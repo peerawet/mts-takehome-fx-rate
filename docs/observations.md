@@ -229,7 +229,7 @@ error แต่ละแบบใช้คนละรูปแบบ (`error` /
 เพิ่มเติม: `Authorization: Bearer <token>` ก็ได้ 200 เหมือนกัน แต่ให้ยึดแบบไม่มี `Bearer` ตาม spec
 
 ### 20. API อีกตัว (Average Exchange Rate) ต่างจากตัวที่ใช้ยังไง
-อ่านจาก `response_1756451107846.json` (spec v2.0.2 ของ `Stat-ExchangeRate`) และยิงจริง 5 ครั้งด้วย key เดียวกันเมื่อ 2026-11-26
+อ่านจาก `docs/api-specs/exchange-rate_v2.0.2.json` (spec v2.0.2 ของ `Stat-ExchangeRate` เดิมชื่อ `response_1756451107846.json`) และยิงจริง 5 ครั้งด้วย key เดียวกันเมื่อ 2026-11-26
 
 | | ReferenceRate (ใช้) | ExchangeRate (ไม่ใช้) |
 |---|---|---|

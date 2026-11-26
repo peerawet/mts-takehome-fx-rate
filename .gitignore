@@ -1,0 +1,13 @@
+# credentials (BOT_API_KEY) must never be committed
+.env
+
+# uv virtualenv (also holds the SQLite output per the brief)
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor
+.DS_Store
+Thumbs.db

@@ -1,0 +1,2373 @@
+<title>MTS Take-home Field Notes</title>
+<meta name="claude:viewport-fit-sides" content="cover" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
+/>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          bg: "var(--bg)",
+          band: "var(--band)",
+          surface: "var(--surface)",
+          sunken: "var(--sunken)",
+          ink: "var(--ink)",
+          muted: "var(--muted)",
+          line: "var(--line)",
+          accent: "var(--accent)",
+          "accent-soft": "var(--accent-soft)",
+          ok: "var(--ok)",
+          "ok-soft": "var(--ok-soft)",
+          warn: "var(--warn)",
+          "warn-soft": "var(--warn-soft)",
+          bad: "var(--bad)",
+          "bad-soft": "var(--bad-soft)",
+          code: "var(--code-bg)",
+          "code-ink": "var(--code-ink)",
+          "code-line": "var(--code-line)",
+          "code-dim": "var(--code-dim)",
+        },
+        fontFamily: {
+          display: ["Anuphan", "IBM Plex Sans Thai", "system-ui", "sans-serif"],
+          sans: [
+            "IBM Plex Sans Thai",
+            "system-ui",
+            "-apple-system",
+            "Segoe UI",
+            "sans-serif",
+          ],
+          mono: ["JetBrains Mono", "ui-monospace", "Consolas", "monospace"],
+        },
+      },
+    },
+  };
+</script>
+<style>
+  /* Layout: two full-width bands (Part 1 study notes on the page ground, Part 2 API lab on a tinted band) under a sticky part switcher.
+   Notes read as question-left / answer-right rows; lab entries read as console panes (request | response) with findings below. */
+  :root {
+    --bg: #f5f7fb;
+    --band: #eaeef6;
+    --surface: #ffffff;
+    --sunken: #f0f3f9;
+    --ink: #121a2b;
+    --muted: #59647a;
+    --line: #dce2ed;
+    --accent: #2547c4;
+    --accent-soft: #e5ebfc;
+    --ok: #137347;
+    --ok-soft: #e1f3e9;
+    --warn: #925400;
+    --warn-soft: #fcefd8;
+    --bad: #b42318;
+    --bad-soft: #fde6e3;
+    --code-bg: #0f1626;
+    --code-ink: #d5ddec;
+    --code-line: #1f2a40;
+    --code-dim: #6f7d99;
+    --code-key: #92b2ff;
+    --code-str: #9fdcb6;
+    --code-hl: #f3c677;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b1019;
+      --band: #0f1622;
+      --surface: #131b29;
+      --sunken: #182233;
+      --ink: #e5eaf3;
+      --muted: #919cb2;
+      --line: #243046;
+      --accent: #87a2ff;
+      --accent-soft: #1b2648;
+      --ok: #63d39d;
+      --ok-soft: #11301f;
+      --warn: #f1b552;
+      --warn-soft: #33260e;
+      --bad: #ff8b80;
+      --bad-soft: #3b1714;
+      --code-bg: #070b13;
+      --code-ink: #d5ddec;
+      --code-line: #1a2336;
+      --code-dim: #66748f;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b1019;
+    --band: #0f1622;
+    --surface: #131b29;
+    --sunken: #182233;
+    --ink: #e5eaf3;
+    --muted: #919cb2;
+    --line: #243046;
+    --accent: #87a2ff;
+    --accent-soft: #1b2648;
+    --ok: #63d39d;
+    --ok-soft: #11301f;
+    --warn: #f1b552;
+    --warn-soft: #33260e;
+    --bad: #ff8b80;
+    --bad-soft: #3b1714;
+    --code-bg: #070b13;
+    --code-ink: #d5ddec;
+    --code-line: #1a2336;
+    --code-dim: #66748f;
+    color-scheme: dark;
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 72px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans Thai", system-ui, sans-serif;
+    line-height: 1.75;
+    font-size: 15.5px;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 50;
+    background: var(--surface);
+  }
+  .gutter {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  .grid > * {
+    min-width: 0;
+  }
+  .grid:not([class*="grid-cols"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :not(pre) > code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.83em;
+    background: var(--sunken);
+    border: 1px solid var(--line);
+    padding: 0.05em 0.38em;
+    border-radius: 5px;
+    overflow-wrap: anywhere;
+  }
+  pre {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    margin: 0;
+    overflow-x: auto;
+  }
+  .tk {
+    color: var(--code-key);
+  }
+  .ts {
+    color: var(--code-str);
+  }
+  .tc {
+    color: var(--code-dim);
+    font-style: italic;
+  }
+  .th {
+    color: var(--code-hl);
+  }
+  .tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .tbl th,
+  .tbl td {
+    text-align: left;
+    vertical-align: top;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tbl tr:last-child td {
+    border-bottom: 0;
+  }
+  .tbl th {
+    font-family: "Anuphan", sans-serif;
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--muted);
+    background: var(--sunken);
+  }
+  .ans {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+  }
+  .ans ul,
+  .ans ol {
+    padding-left: 1.25em;
+    display: grid;
+    gap: 4px;
+  }
+  .ans ul {
+    list-style: disc;
+  }
+  .ans ol {
+    list-style: decimal;
+  }
+  .ans li::marker {
+    color: var(--muted);
+  }
+  .navlink[aria-current="true"] {
+    color: var(--ink);
+  }
+  .navlink[aria-current="true"] .bar {
+    transform: scaleX(1);
+  }
+  .navlink .bar {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  .eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+</style>
+
+<!-- ===================== sticky part switcher ===================== -->
+<div
+  class="sticky z-40 border-b border-line"
+  style="top: env(safe-area-inset-top, 0px); background: var(--surface)"
+>
+  <div class="gutter">
+    <nav
+      class="mx-auto flex max-w-6xl items-center gap-6 overflow-x-auto"
+      aria-label="ส่วนของหน้า"
+    >
+      <a
+        href="#top"
+        class="shrink-0 py-3 font-mono text-xs font-semibold text-muted hover:text-ink"
+        >USD/THB · BOT</a
+      >
+      <a
+        href="#part1"
+        class="navlink relative shrink-0 py-3.5 text-sm font-medium text-muted hover:text-ink"
+      >
+        <span class="font-mono text-xs text-accent">1</span> ศึกษาโจทย์
+        <span class="bar absolute inset-x-0 -bottom-px h-0.5 bg-accent"></span>
+      </a>
+      <a
+        href="#docs"
+        class="navlink relative shrink-0 py-3.5 text-sm font-medium text-muted hover:text-ink"
+      >
+        <span class="font-mono text-xs text-accent">2</span> เอกสาร API
+        <span class="bar absolute inset-x-0 -bottom-px h-0.5 bg-accent"></span>
+      </a>
+      <a
+        href="#part2"
+        class="navlink relative shrink-0 py-3.5 text-sm font-medium text-muted hover:text-ink"
+      >
+        <span class="font-mono text-xs text-accent">3</span> ทดลองยิง API
+        <span class="bar absolute inset-x-0 -bottom-px h-0.5 bg-accent"></span>
+      </a>
+      <a
+        href="#impact"
+        class="navlink relative shrink-0 py-3.5 text-sm font-medium text-muted hover:text-ink"
+      >
+        กฎที่ได้สำหรับโค้ด
+        <span class="bar absolute inset-x-0 -bottom-px h-0.5 bg-accent"></span>
+      </a>
+    </nav>
+  </div>
+</div>
+
+<!-- ===================== hero ===================== -->
+<header id="top" class="gutter">
+  <div
+    class="mx-auto grid max-w-6xl gap-10 py-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:py-16"
+  >
+    <div class="grid gap-5">
+      <p class="eyebrow text-accent">MTS Take-home · Field notes</p>
+      <h1 class="font-display text-4xl font-bold leading-[1.15] sm:text-5xl">
+        ดึงเรต USD/THB ของ ธปท.<br />ลง SQLite
+      </h1>
+      <p class="max-w-xl text-muted">
+        บันทึกสามส่วน เริ่มจากคำถามที่ถามตัวเองระหว่างอ่านโจทย์
+        ต่อด้วยสิ่งที่เอกสาร API ของ ธปท. เขียนไว้ แล้วปิดด้วยการยิง API
+        จริงเพื่อตรวจว่าเอกสารถูกไหม ซึ่งเจอ 4 เรื่องที่เอกสารไม่ได้บอก
+      </p>
+      <div class="grid gap-3 sm:grid-cols-3">
+        <a
+          href="#part1"
+          class="group grid gap-1 rounded-xl border border-line bg-surface p-4 transition hover:border-accent"
+        >
+          <span class="eyebrow text-muted">ส่วนที่ 1</span>
+          <span class="font-display text-lg font-semibold">ศึกษาโจทย์</span>
+          <span class="text-sm text-muted">16 คำถาม</span>
+        </a>
+        <a
+          href="#docs"
+          class="group grid gap-1 rounded-xl border border-line bg-surface p-4 transition hover:border-accent"
+        >
+          <span class="eyebrow text-muted">ส่วนที่ 2</span>
+          <span class="font-display text-lg font-semibold">เอกสาร API</span>
+          <span class="text-sm text-muted">spec v2.0.1</span>
+        </a>
+        <a
+          href="#part2"
+          class="group grid gap-1 rounded-xl border border-line bg-surface p-4 transition hover:border-accent"
+        >
+          <span class="eyebrow text-muted">ส่วนที่ 3</span>
+          <span class="font-display text-lg font-semibold">ทดลองยิง API</span>
+          <span class="text-sm text-muted">18 request</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- rate ticker -->
+    <figure
+      class="overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_1px_0_var(--line),0_12px_32px_-18px_rgba(18,26,43,.35)]"
+    >
+      <div class="flex flex-wrap items-end justify-between gap-4 px-6 pt-5">
+        <div>
+          <p class="eyebrow text-muted">
+            Weighted-avg interbank · THB per 1 USD
+          </p>
+          <p
+            class="mt-1 font-mono text-4xl font-semibold tabular-nums tracking-tight"
+          >
+            34.0140
+          </p>
+          <p class="mt-1 font-mono text-sm tabular-nums">
+            <span class="text-bad">▼ 0.0110 (−0.03%)</span>
+            <span class="text-muted">· 26 พ.ย. 2026</span>
+          </p>
+        </div>
+        <dl
+          class="grid grid-cols-2 gap-x-6 gap-y-1 font-mono text-xs tabular-nums"
+        >
+          <dt class="text-muted">สูงสุด</dt>
+          <dd class="text-right">
+            34.0250 <span class="text-muted">25/11</span>
+          </dd>
+          <dt class="text-muted">ต่ำสุด</dt>
+          <dd class="text-right">
+            33.3920 <span class="text-muted">10/11</span>
+          </dd>
+          <dt class="text-muted">วันทำการ</dt>
+          <dd class="text-right">24</dd>
+        </dl>
+      </div>
+      <svg
+        id="spark"
+        viewBox="0 0 640 170"
+        class="mt-2 block h-auto w-full"
+        role="img"
+        aria-label="กราฟเรต USD/THB รายวัน 26 ต.ค. ถึง 26 พ.ย. 2026"
+      ></svg>
+      <figcaption class="border-t border-line px-6 py-2.5 text-xs text-muted">
+        ข้อมูลจริงจาก
+        <a href="#exp-1" class="text-accent underline-offset-2 hover:underline"
+          >EXP-1</a
+        >
+        ช่วง 26 ต.ค. – 26 พ.ย. 2026 ยิงเมื่อ 26 พ.ย. 21:20 น.
+      </figcaption>
+    </figure>
+  </div>
+</header>
+
+<!-- ===================== PART 1 ===================== -->
+<section id="part1" class="gutter border-t border-line">
+  <div class="mx-auto max-w-6xl py-14">
+    <div
+      class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-end"
+    >
+      <div>
+        <p class="eyebrow text-accent">ส่วนที่ 1</p>
+        <h2 class="mt-2 font-display text-3xl font-bold sm:text-4xl">
+          ศึกษาโจทย์
+        </h2>
+      </div>
+      <p class="text-muted">
+        คำถามที่เกิดขึ้นระหว่างอ่านโจทย์ spec และหน้า portal
+        เลขข้อคือลำดับที่ถามจริง จัดกลุ่มตามเรื่องเพื่อให้อ่านง่าย ข้อที่มีป้าย
+        <span
+          class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-semibold text-accent"
+          >NOTES</span
+        >
+        คือวัตถุดิบสำหรับ NOTES.md และข้อที่มีป้าย
+        <span
+          class="rounded-full bg-warn-soft px-2 py-0.5 text-xs font-semibold text-warn"
+          >แก้หลังทดลอง</span
+        >
+        คือข้อที่การยิงจริงในส่วนที่ 3 ทำให้ต้องเปลี่ยนความเข้าใจ
+      </p>
+    </div>
+
+    <!-- category index -->
+    <div
+      class="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      id="catIndex"
+    ></div>
+
+    <div class="mt-12 grid gap-16" id="qa"></div>
+  </div>
+</section>
+
+<!-- ===================== API DOCS ===================== -->
+<section id="docs" class="gutter border-t border-line bg-surface">
+  <div class="mx-auto max-w-6xl py-14">
+    <div
+      class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-end"
+    >
+      <div>
+        <p class="eyebrow text-accent">ส่วนที่ 2</p>
+        <h2 class="mt-2 font-display text-3xl font-bold sm:text-4xl">
+          เอกสาร API
+        </h2>
+      </div>
+      <p class="text-muted">
+        สรุปจากไฟล์ OpenAPI ที่ดาวน์โหลดจาก portal ของ ธปท.
+        (<code>weighted-average-interbank-exchange-rate-thb--usd_2.0.1.json</code>)
+        คอลัมน์ "ของจริง" เทียบกับผลการยิงในส่วนที่ 3
+      </p>
+    </div>
+
+    <!-- overview -->
+    <div
+      class="mt-8 grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"
+    >
+      <div
+        class="grid content-start gap-4 rounded-xl border border-line bg-bg p-5"
+      >
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <p class="font-display text-lg font-semibold">
+            Weighted-average Interbank Exchange Rate – THB / USD
+          </p>
+          <span
+            class="rounded-md border border-line px-2 py-0.5 font-mono text-xs text-muted"
+            >OpenAPI 3.0.1 · v2.0.1</span
+          >
+        </div>
+        <dl
+          class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[150px_minmax(0,1fr)]"
+        >
+          <dt class="text-muted">Server</dt>
+          <dd>
+            <code>https://gateway.api.bot.or.th/Stat-ReferenceRate/v2</code>
+          </dd>
+          <dt class="text-muted">Auth</dt>
+          <dd>
+            API key ใน header <code>Authorization</code> (security scheme ชื่อ
+            <code>clientIdHeader</code>)
+          </dd>
+          <dt class="text-muted">x-ibm-name</dt>
+          <dd>
+            <code>weighted-average-interbank-exchange-rate-thb--usd</code>
+          </dd>
+          <dt class="text-muted">Response ที่เขียนไว้</dt>
+          <dd>มีแค่ <code>200 OK</code> ไม่มี error response เลย</dd>
+          <dt class="text-muted">Rate limit</dt>
+          <dd>
+            ไม่ได้เขียนใน spec หน้า product ใน portal บอก 200 ครั้ง/ชั่วโมง
+          </dd>
+        </dl>
+      </div>
+      <div
+        class="grid content-start gap-3 rounded-xl border border-line bg-bg p-5 text-sm"
+      >
+        <p class="eyebrow text-muted">ที่มาของข้อมูล (จาก description)</p>
+        <p>
+          คำนวณจากรายการซื้อขาย USD กับ THB ระหว่างธนาคาร ที่มูลค่าตั้งแต่ 1
+          ล้าน USD ขึ้นไป เฉลี่ยถ่วงน้ำหนักด้วยปริมาณซื้อขาย
+        </p>
+        <ul class="grid gap-1 pl-5 list-disc">
+          <li>ธนาคารพาณิชย์ที่จดทะเบียนในไทย</li>
+          <li>สาขาธนาคารต่างประเทศ</li>
+          <li>สถาบันการเงินเฉพาะกิจ</li>
+        </ul>
+        <a
+          class="w-fit text-accent hover:underline"
+          href="https://app.bot.or.th/BTWS_STAT/statistics/DownloadFile.aspx?file=FM_FX_001_S3_ENG.PDF"
+          target="_blank"
+          rel="noopener"
+          >เอกสารวิธีคำนวณ (PDF) ↗</a
+        >
+      </div>
+    </div>
+
+    <!-- endpoints -->
+    <h3 class="mt-12 font-display text-xl font-semibold">
+      Endpoint ทั้ง 4 เส้น
+    </h3>
+    <p class="mt-1 text-sm text-muted">
+      ทุกเส้นเป็น <code>GET</code> รับ <code>start_period</code> และ
+      <code>end_period</code> บังคับทั้งคู่ ต่างกันที่รูปแบบช่วงเวลา
+      โจทย์ใช้แค่เส้นรายวัน
+    </p>
+    <div class="mt-4 overflow-x-auto rounded-xl border border-line">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Path</th>
+            <th>ความถี่</th>
+            <th>รูปแบบ period</th>
+            <th>ตัวอย่าง</th>
+            <th>ประกาศ</th>
+            <th>คำนวณจาก</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="bg-accent-soft">
+            <td class="whitespace-nowrap">
+              <code>/DAILY_REF_RATE/</code>
+              <span
+                class="ml-1 rounded-full bg-accent px-2 py-0.5 text-[11px] font-semibold text-surface"
+                >ใช้</span
+              >
+            </td>
+            <td>รายวัน</td>
+            <td class="font-mono text-xs">YYYY-MM-DD</td>
+            <td class="font-mono text-xs">2017-06-30</td>
+            <td>ทุกวันทำการ 18:00 น.</td>
+            <td>รายการซื้อขายระหว่างวัน</td>
+          </tr>
+          <tr>
+            <td class="whitespace-nowrap"><code>/MONTHLY_REF_RATE/</code></td>
+            <td>รายเดือน</td>
+            <td class="font-mono text-xs">YYYY-MM</td>
+            <td class="font-mono text-xs">2017-06</td>
+            <td>วันทำการสุดท้ายของเดือน 18:00 น.</td>
+            <td>เฉลี่ยจากเรตรายวัน</td>
+          </tr>
+          <tr>
+            <td class="whitespace-nowrap"><code>/QUARTERLY_REF_RATE/</code></td>
+            <td>รายไตรมาส</td>
+            <td class="font-mono text-xs">YYYY-QN</td>
+            <td class="font-mono text-xs">2017-Q1</td>
+            <td>วันทำการสุดท้ายของไตรมาส 18:00 น.</td>
+            <td>เฉลี่ยจากเรตรายเดือน</td>
+          </tr>
+          <tr>
+            <td class="whitespace-nowrap"><code>/ANNUAL_REF_RATE/</code></td>
+            <td>รายปี</td>
+            <td class="font-mono text-xs">YYYY</td>
+            <td class="font-mono text-xs">2017</td>
+            <td>วันทำการสุดท้ายของปี 18:00 น.</td>
+            <td>เฉลี่ยจากเรตรายไตรมาส</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- daily detail -->
+    <div class="mt-12 overflow-hidden rounded-2xl border border-line">
+      <div
+        class="flex flex-wrap items-center gap-3 border-b border-line bg-bg px-5 py-4"
+      >
+        <span
+          class="rounded-md bg-ok-soft px-2 py-0.5 font-mono text-xs font-semibold text-ok"
+          >GET</span
+        >
+        <code
+          class="!border-0 !bg-transparent !p-0 font-mono text-base font-semibold"
+          >/DAILY_REF_RATE/</code
+        >
+        <span class="text-sm text-muted"
+          >Daily Weighted-average Interbank Exchange Rate – THB / USD</span
+        >
+      </div>
+
+      <div class="grid gap-8 p-5 sm:p-6">
+        <!-- params -->
+        <div class="grid gap-3">
+          <p class="eyebrow text-muted">Query parameters</p>
+          <div class="overflow-x-auto rounded-lg border border-line">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>ชื่อ</th>
+                  <th>ชนิด</th>
+                  <th>บังคับ</th>
+                  <th>คำอธิบายใน spec (ตามต้นฉบับ)</th>
+                  <th>ของจริง</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>start_period</code></td>
+                  <td class="font-mono text-xs">string</td>
+                  <td>ใช่</td>
+                  <td>
+                    <span class="font-mono text-xs"
+                      >"Start Period Date (YYYY-MM-DD) EX. 2017-06-30"</span
+                    >
+                  </td>
+                  <td>
+                    <span class="text-ok">✓</span> ผิดรูปแบบได้ 400
+                    <a class="text-accent hover:underline" href="#exp-6"
+                      >EXP-6</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>end_period</code></td>
+                  <td class="font-mono text-xs">string</td>
+                  <td>ใช่</td>
+                  <td>
+                    <span class="font-mono text-xs"
+                      >"End Preiod Date (YYYY-MM-DD) EX. 2017-06-30"</span
+                    >
+                    <span class="text-xs text-muted"
+                      >(สะกด Preiod ผิดในต้นฉบับ)</span
+                    >
+                  </td>
+                  <td>
+                    <span class="text-ok">✓</span> วันในอนาคตได้
+                    <a class="text-accent hover:underline" href="#exp-4"
+                      >EXP-4</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td class="text-muted">ช่วงสูงสุด</td>
+                  <td colspan="3" class="text-muted">ไม่ได้เขียนไว้</td>
+                  <td>
+                    <span class="text-warn">!</span> ไม่เกิน 31 วัน
+                    <a class="text-accent hover:underline" href="#exp-3"
+                      >EXP-3</a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- schema -->
+        <div class="grid gap-3">
+          <p class="eyebrow text-muted">
+            Response 200 · schema "Daily Response Parameters"
+          </p>
+          <div class="overflow-x-auto rounded-lg border border-line">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>ชนิดใน spec</th>
+                  <th>ตัวอย่างใน spec</th>
+                  <th>ของจริง</th>
+                </tr>
+              </thead>
+              <tbody
+                class="[&_td:first-child]:font-mono [&_td:first-child]:text-[12.5px] [&_td:first-child]:whitespace-nowrap"
+              >
+                <tr>
+                  <td>result.api</td>
+                  <td class="font-mono text-xs">string</td>
+                  <td class="text-xs">
+                    "Daily Weighted-average Interbank Exchange Rate - THB / USD"
+                  </td>
+                  <td><span class="text-ok">✓</span> ตรง</td>
+                </tr>
+                <tr>
+                  <td>result.timestamp</td>
+                  <td class="font-mono text-xs">string</td>
+                  <td class="font-mono text-xs">"2017-07-07 17:14:28"</td>
+                  <td>
+                    <span class="text-ok">✓</span> รูปแบบเดียวกัน ไม่มี timezone
+                    เป็นเวลาไทย
+                  </td>
+                </tr>
+                <tr>
+                  <td>result.data.data_header</td>
+                  <td class="font-mono text-xs">object</td>
+                  <td class="text-xs text-muted">ข้อมูลรายงาน</td>
+                  <td class="text-muted">ไม่ได้ใช้</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;&nbsp;.report_name_eng</td>
+                  <td class="font-mono text-xs">string</td>
+                  <td class="text-xs">
+                    "Rates of Exchange of Commercial Banks in Bangkok Metropolis
+                    (2002-present)"
+                  </td>
+                  <td>
+                    <span class="text-bad">✗</span> เป็นชื่อรายงานของ
+                    ExchangeRate ทั้งใน spec และของจริง
+                  </td>
+                </tr>
+                <tr>
+                  <td>&nbsp;&nbsp;.report_name_th</td>
+                  <td class="font-mono text-xs">string</td>
+                  <td class="text-xs">
+                    "อัตราแลกเปลี่ยนเฉลี่ยของธนาคารพาณิชย์ในกรุงเทพมหานคร
+                    (2545-ปัจจุบัน)"
+                  </td>
+                  <td><span class="text-bad">✗</span> ปัญหาเดียวกัน</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;&nbsp;.report_uoq_name_eng / _th</td>
+                  <td class="font-mono text-xs">string</td>
+                  <td class="text-xs">
+                    "(Unit : Baht / 1 Unit of Foreign Currency)"
+                  </td>
+                  <td>
+                    <span class="text-ok">✓</span> ของจริงไม่มีช่องว่างหน้า ":"
+                  </td>
+                </tr>
+                <tr>
+                  <td>&nbsp;&nbsp;.report_source_of_data[]</td>
+                  <td class="font-mono text-xs">array</td>
+                  <td class="text-xs">
+                    { "source_of_data_eng": "Bank of Thailand", ... }
+                  </td>
+                  <td><span class="text-ok">✓</span> ตรง</td>
+                </tr>
+                <tr>
+                  <td>&nbsp;&nbsp;.report_remark</td>
+                  <td class="font-mono text-xs">array</td>
+                  <td class="font-mono text-xs">""</td>
+                  <td>
+                    <span class="text-ok">✓</span> ของจริงเป็น
+                    <code>[]</code> (ตัวอย่างใน spec เป็น string)
+                  </td>
+                </tr>
+                <tr>
+                  <td>&nbsp;&nbsp;.last_updated</td>
+                  <td class="font-mono text-xs">string</td>
+                  <td class="font-mono text-xs">"2017-06-13"</td>
+                  <td><span class="text-ok">✓</span> ตรง</td>
+                </tr>
+                <tr class="bg-accent-soft">
+                  <td>result.data.data_detail</td>
+                  <td class="font-mono text-xs"><b>object</b></td>
+                  <td class="text-xs">ตัวอย่างเป็น array 2 แถว</td>
+                  <td>
+                    <span class="text-bad">✗</span> ของจริงเป็น
+                    <b>array</b> และถ้าไม่มีข้อมูลได้แถวว่าง
+                    <a class="text-accent hover:underline" href="#exp-4"
+                      >EXP-4</a
+                    >
+                  </td>
+                </tr>
+                <tr class="bg-accent-soft">
+                  <td>&nbsp;&nbsp;[].period</td>
+                  <td class="font-mono text-xs">string</td>
+                  <td class="font-mono text-xs">"2002-01-15"</td>
+                  <td>
+                    <span class="text-ok">✓</span> YYYY-MM-DD เรียงจากใหม่ไปเก่า
+                  </td>
+                </tr>
+                <tr class="bg-accent-soft">
+                  <td>&nbsp;&nbsp;[].rate</td>
+                  <td class="font-mono text-xs">string</td>
+                  <td class="font-mono text-xs">"43.9200000"</td>
+                  <td>
+                    <span class="text-ok">✓</span> string ทศนิยม 7 ตำแหน่ง
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-sm text-muted">
+            schema ของเส้นรายเดือน รายไตรมาส และรายปี ประกาศ
+            <code>data_detail</code> เป็น array ถูกต้อง
+            มีแค่เส้นรายวันที่ประกาศผิดเป็น object
+          </p>
+        </div>
+
+        <!-- example -->
+        <div class="grid gap-4 lg:grid-cols-2">
+          <div class="grid content-start gap-3">
+            <p class="eyebrow text-muted">ตัวอย่าง response ตาม spec</p>
+            <pre
+              class="whitespace-pre-wrap break-words rounded-lg bg-code px-4 py-3 text-code-ink"
+            >{
+  <span class="tk">"result"</span>: {
+    <span class="tk">"api"</span>: <span class="ts">"Daily Weighted-average Interbank Exchange Rate - THB / USD"</span>,
+    <span class="tk">"timestamp"</span>: <span class="ts">"2017-07-07 17:14:28"</span>,
+    <span class="tk">"data"</span>: {
+      <span class="tk">"data_header"</span>: { <span class="tc">... ข้อมูลรายงาน ...</span> },
+      <span class="tk">"data_detail"</span>: [
+        { <span class="tk">"period"</span>: <span class="ts">"2002-01-15"</span>, <span class="tk">"rate"</span>: <span class="ts">"43.9200000"</span> },
+        { <span class="tk">"period"</span>: <span class="ts">"2002-01-14"</span>, <span class="tk">"rate"</span>: <span class="ts">"43.9230000"</span> }
+      ]
+    }
+  }
+}</pre>
+          </div>
+          <div class="grid content-start gap-3">
+            <p class="eyebrow text-muted">
+              สิ่งที่ spec ไม่ได้เขียนไว้ แต่เจอตอนยิงจริง
+            </p>
+            <ul class="grid gap-2 text-[15px]">
+              <li class="flex gap-3 rounded-lg border border-line bg-bg p-3">
+                <span class="font-mono text-warn">!</span
+                ><span
+                  >ขอได้ไม่เกิน 31 วันต่อครั้ง
+                  <a class="text-accent hover:underline" href="#f-limit"
+                    >ข้อค้นพบ</a
+                  ></span
+                >
+              </li>
+              <li class="flex gap-3 rounded-lg border border-line bg-bg p-3">
+                <span class="font-mono text-warn">!</span
+                ><span
+                  >วันที่ไม่มีข้อมูลได้ <code>[{"period":"","rate":""}]</code>
+                  <a class="text-accent hover:underline" href="#f-empty"
+                    >ข้อค้นพบ</a
+                  ></span
+                >
+              </li>
+              <li class="flex gap-3 rounded-lg border border-line bg-bg p-3">
+                <span class="font-mono text-warn">!</span
+                ><span
+                  >error 400, 401, 403, 404 และรูปแบบ body ของแต่ละแบบ
+                  <a class="text-accent hover:underline" href="#f-errors"
+                    >ข้อค้นพบ</a
+                  ></span
+                >
+              </li>
+              <li class="flex gap-3 rounded-lg border border-line bg-bg p-3">
+                <span class="font-mono text-warn">!</span
+                ><span
+                  >header <code>X-RateLimit-*</code> มีค่าแต่ใช้ไม่ได้
+                  <a class="text-accent hover:underline" href="#f-ratelimit"
+                    >ข้อค้นพบ</a
+                  ></span
+                >
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="border-t border-line pt-4 text-sm text-muted">
+          คำผิดในต้นฉบับ: "Intebank" ใน description ของเส้นรายวัน, "End Preiod
+          Date" ในเส้นรายวัน รายไตรมาส และรายปี และ
+          <code>components.parameters</code> ใช้รูปแบบ YYYY-QN
+          ของรายไตรมาสเป็นค่ากลาง (ไม่มี endpoint ไหนอ้างถึง)
+        </p>
+      </div>
+    </div>
+
+    <!-- ============ the other API ============ -->
+    <div id="exg" class="mt-16 grid gap-6">
+      <div
+        class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-end"
+      >
+        <div>
+          <p class="eyebrow text-muted">เทียบกับ API อีกตัว</p>
+          <h3 class="mt-2 font-display text-2xl font-semibold">
+            Average Exchange Rate – THB / Foreign Currency
+          </h3>
+        </div>
+        <p class="text-muted">
+          สรุปจาก <code>response_1756451107846.json</code> (spec v2.0.2)
+          ซึ่งเป็น spec แรกที่โหลดมาผิดตัว (Q15) และยิงจริงเพิ่ม 5 ครั้งด้วย key
+          เดียวกันเพื่อเทียบ (<a
+            class="text-accent hover:underline"
+            href="#exp-7"
+            >EXP-7</a
+          >) โจทย์ไม่ได้ใช้ API นี้ แต่รู้ไว้จะได้ไม่หยิบผิดตัว
+        </p>
+      </div>
+
+      <!-- overview -->
+      <div class="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <div
+          class="grid content-start gap-4 rounded-xl border border-line bg-bg p-5"
+        >
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <p class="font-display text-lg font-semibold">ภาพรวม spec</p>
+            <span
+              class="rounded-md border border-line px-2 py-0.5 font-mono text-xs text-muted"
+              >OpenAPI 3.0.1 · v2.0.2</span
+            >
+          </div>
+          <dl
+            class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[150px_minmax(0,1fr)]"
+          >
+            <dt class="text-muted">Server</dt>
+            <dd>
+              <code>https://gateway.api.bot.or.th/Stat-ExchangeRate/v2</code>
+            </dd>
+            <dt class="text-muted">Endpoint</dt>
+            <dd>
+              <code>/DAILY_AVG_EXG_RATE/</code>
+              <code>/MONTHLY_AVG_EXG_RATE/</code>
+              <code>/QUARTERLY_AVG_EXG_RATE/</code>
+              <code>/ANNUAL_AVG_EXG_RATE/</code>
+            </dd>
+            <dt class="text-muted">Parameter</dt>
+            <dd>
+              <code>start_period</code>, <code>end_period</code> (บังคับ) และ
+              <code>currency</code> (ไม่บังคับ ไม่ส่งได้ทุกสกุล)
+            </dd>
+            <dt class="text-muted">Auth</dt>
+            <dd>เหมือนกัน <code>Authorization</code> และ key เดียวกันใช้ได้</dd>
+            <dt class="text-muted">ข้อมูล</dt>
+            <dd>
+              อัตราซื้อขายทันที (spot) ระหว่างบาทกับ 19 สกุล
+              จากรายงานธุรกรรมของธนาคารพาณิชย์
+            </dd>
+          </dl>
+        </div>
+        <div
+          class="grid content-start gap-3 rounded-xl border border-line bg-bg p-5 text-sm"
+        >
+          <p class="eyebrow text-muted">19 สกุลที่ได้จริง (26 พ.ย. 2026)</p>
+          <div class="flex flex-wrap gap-1.5 font-mono text-xs">
+            <span
+              class="rounded border border-accent bg-accent-soft px-1.5 py-0.5 text-accent"
+              >USD</span
+            ><span class="rounded border border-line px-1.5 py-0.5">GBP</span
+            ><span class="rounded border border-line px-1.5 py-0.5">EUR</span
+            ><span
+              class="rounded border border-warn bg-warn-soft px-1.5 py-0.5 text-warn"
+              >JPY ×100</span
+            ><span class="rounded border border-line px-1.5 py-0.5">HKD</span
+            ><span class="rounded border border-line px-1.5 py-0.5">MYR</span
+            ><span class="rounded border border-line px-1.5 py-0.5">SGD</span
+            ><span class="rounded border border-line px-1.5 py-0.5">BND</span
+            ><span class="rounded border border-line px-1.5 py-0.5">PHP</span
+            ><span
+              class="rounded border border-warn bg-warn-soft px-1.5 py-0.5 text-warn"
+              >IDR ×1,000</span
+            ><span class="rounded border border-line px-1.5 py-0.5">INR</span
+            ><span class="rounded border border-line px-1.5 py-0.5">CHF</span
+            ><span class="rounded border border-line px-1.5 py-0.5">AUD</span
+            ><span class="rounded border border-line px-1.5 py-0.5">NZD</span
+            ><span class="rounded border border-line px-1.5 py-0.5">CAD</span
+            ><span class="rounded border border-line px-1.5 py-0.5">SEK</span
+            ><span class="rounded border border-line px-1.5 py-0.5">DKK</span
+            ><span class="rounded border border-line px-1.5 py-0.5">NOK</span
+            ><span class="rounded border border-line px-1.5 py-0.5">CNY</span>
+          </div>
+          <p class="text-muted">
+            JPY เป็นบาทต่อ 100 เยน และ IDR เป็นบาทต่อ 1,000 รูเปียห์ ไม่ใช่ต่อ 1
+            หน่วย หน่วยบอกอยู่ในชื่อสกุลเท่านั้น ไม่มีฟิลด์แยก
+          </p>
+        </div>
+      </div>
+
+      <!-- comparison -->
+      <div class="overflow-x-auto rounded-xl border border-line">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th class="w-[150px]">ด้าน</th>
+              <th>
+                ReferenceRate <span class="font-normal">(ตัวที่ใช้)</span>
+              </th>
+              <th>ExchangeRate <span class="font-normal">(ไม่ใช้)</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="font-medium">ซื้อขายระหว่าง</td>
+              <td>ธนาคารกับธนาคาร (interbank)</td>
+              <td>ธนาคารกับลูกค้า (เรตที่ธนาคารประกาศ)</td>
+            </tr>
+            <tr>
+              <td class="font-medium">วิธีคำนวณ</td>
+              <td>เฉลี่ยถ่วงน้ำหนักด้วยปริมาณ รายการ ≥ 1 ล้าน USD</td>
+              <td>ค่าเฉลี่ยเรตที่ธนาคารพาณิชย์รายงาน</td>
+            </tr>
+            <tr>
+              <td class="font-medium">สกุลเงิน</td>
+              <td>USD อย่างเดียว</td>
+              <td>19 สกุล เลือกด้วย <code>currency</code></td>
+            </tr>
+            <tr>
+              <td class="font-medium">ตัวเลขต่อวัน</td>
+              <td>1 ตัว: <code>rate</code></td>
+              <td>
+                4 ตัวต่อสกุล: <code>buying_sight</code>,
+                <code>buying_transfer</code>, <code>selling</code>,
+                <code>mid_rate</code>
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium">ฟิลด์ใน data_detail</td>
+              <td><code>period</code>, <code>rate</code></td>
+              <td>
+                <code>period</code>, <code>currency_id</code>,
+                <code>currency_name_th</code>, <code>currency_name_eng</code> +
+                4 เรต
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium">report_remark</td>
+              <td><code>[]</code></td>
+              <td>
+                array ของ
+                <code>{report_remark_eng, report_remark_th}</code>
+                (หมายเหตุเรื่องเรต PKR ที่อ้างอิง LSEG แม้ PKR จะไม่อยู่ใน 19
+                สกุลที่ได้)
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium">data_detail ใน spec</td>
+              <td>ประกาศผิดเป็น object เฉพาะเส้นรายวัน</td>
+              <td>
+                ประกาศผิดเป็น object ในเส้นรายวัน รายเดือน รายไตรมาส ถูกแค่รายปี
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium">ชื่อใน response จริง</td>
+              <td><code>report_name</code> เป็นชื่อรายงานของ ExchangeRate</td>
+              <td>
+                <code>api</code> เป็นชื่อของ ReferenceRate ("Daily
+                Weighted-average Interbank…") ชื่อสลับกันทั้งสองทาง
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium">จำกัด 31 วัน</td>
+              <td>มี</td>
+              <td>มี ข้อความ error เดียวกัน</td>
+            </tr>
+            <tr>
+              <td class="font-medium">วันที่ไม่มีข้อมูล</td>
+              <td><code>{"period":"","rate":""}</code></td>
+              <td>
+                แถวว่างเหมือนกัน แต่
+                <code>currency_id</code> และชื่อสกุลยังมีค่า
+              </td>
+            </tr>
+            <tr>
+              <td class="font-medium">param ผิด</td>
+              <td>—</td>
+              <td>
+                <code>currency=XYZ</code> ได้ 400
+                <code>"Invalid Currency"</code>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- USD side by side -->
+      <div class="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <div class="grid content-start gap-3">
+          <p class="eyebrow text-muted">USD วันเดียวกัน จากสอง API</p>
+          <div class="overflow-x-auto rounded-xl border border-line">
+            <table class="tbl font-mono tabular-nums">
+              <thead>
+                <tr>
+                  <th>period</th>
+                  <th class="text-right">buying_transfer</th>
+                  <th class="text-right text-accent">ref rate</th>
+                  <th class="text-right">mid_rate</th>
+                  <th class="text-right">selling</th>
+                  <th class="text-right">mid − ref</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2026-11-26</td>
+                  <td class="text-right">33.8733</td>
+                  <td class="text-right font-semibold text-accent">34.0140</td>
+                  <td class="text-right">34.0374</td>
+                  <td class="text-right">34.2015</td>
+                  <td class="text-right">+0.0234</td>
+                </tr>
+                <tr>
+                  <td>2026-11-25</td>
+                  <td class="text-right">33.8292</td>
+                  <td class="text-right font-semibold text-accent">34.0250</td>
+                  <td class="text-right">33.9925</td>
+                  <td class="text-right">34.1558</td>
+                  <td class="text-right">−0.0325</td>
+                </tr>
+                <tr>
+                  <td>2026-11-24</td>
+                  <td class="text-right">33.7927</td>
+                  <td class="text-right font-semibold text-accent">33.9440</td>
+                  <td class="text-right">33.9522</td>
+                  <td class="text-right">34.1117</td>
+                  <td class="text-right">+0.0082</td>
+                </tr>
+                <tr>
+                  <td>2026-11-23</td>
+                  <td class="text-right">33.8165</td>
+                  <td class="text-right font-semibold text-accent">33.9930</td>
+                  <td class="text-right">33.9869</td>
+                  <td class="text-right">34.1573</td>
+                  <td class="text-right">−0.0061</td>
+                </tr>
+                <tr>
+                  <td>2026-11-20</td>
+                  <td class="text-right">33.8065</td>
+                  <td class="text-right font-semibold text-accent">33.9530</td>
+                  <td class="text-right">33.9659</td>
+                  <td class="text-right">34.1252</td>
+                  <td class="text-right">+0.0129</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div
+          class="grid content-start gap-3 rounded-xl border border-line bg-bg p-5 text-[15px]"
+        >
+          <p class="eyebrow text-muted">อ่านตารางนี้ยังไง</p>
+          <p>
+            เรตอ้างอิงอยู่ระหว่างราคารับซื้อกับราคาขายของธนาคารทุกวัน และใกล้กับ
+            <code>mid_rate</code> แต่ไม่เท่ากัน ต่างกันได้ถึง 0.03 บาท
+            บางวันสูงกว่า บางวันต่ำกว่า
+          </p>
+          <p>
+            ส่วนต่างรับซื้อกับขาย (<code>selling − buying_transfer</code>) ราว
+            0.33 บาท คือส่วนต่างที่ลูกค้าจ่ายให้ธนาคาร
+            ซึ่งไม่มีในเรตระหว่างธนาคาร
+          </p>
+          <p class="font-medium">
+            สรุป: ถ้าหยิบ <code>mid_rate</code> มาแทน
+            เลขจะดูใกล้จนไม่มีใครสังเกต แต่ผิดทุกแถว นี่คือเหตุผลที่ต้องดู path
+            <code>Stat-ReferenceRate</code> ให้แน่ใจ
+          </p>
+        </div>
+      </div>
+
+      <div
+        class="rounded-xl border-l-[3px] border-warn bg-warn-soft px-5 py-4 text-[15px]"
+      >
+        <b class="text-warn">จุดผิดในข้อมูลจริงของ ExchangeRate:</b> ชื่อสกุล
+        GBP สะกด <code>"POUND STERING"</code> และ
+        <code>currency_name_eng</code> บางสกุลมีช่องว่างต่อท้าย เช่น
+        <code>"USA : DOLLAR (USD) "</code> ถ้าจะใช้ชื่อเป็น key ต้อง trim ก่อน
+        หรือใช้ <code>currency_id</code> แทน
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PART 3 · LAB ===================== -->
+<section id="part2" class="gutter border-y border-line bg-band">
+  <div class="mx-auto max-w-6xl py-14">
+    <div
+      class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-end"
+    >
+      <div>
+        <p class="eyebrow text-accent">ส่วนที่ 3</p>
+        <h2 class="mt-2 font-display text-3xl font-bold sm:text-4xl">
+          ทดลองยิง API
+        </h2>
+      </div>
+      <p class="text-muted">
+        ยิงจริงด้วย curl เมื่อ 26 พ.ย. 2026 ช่วง 21:20–21:41 น. เวลาไทย
+        (หลังเวลาประกาศ 18:00 น.) เพื่อตรวจสิ่งที่ส่วนที่ 1
+        เชื่อไว้และสิ่งที่เอกสารในส่วนที่ 2 บอก ก่อนเขียน CLAUDE.md ทุก request
+        ในหน้านี้แทน token ด้วย <code>$BOT_API_KEY</code>
+      </p>
+    </div>
+
+    <!-- setup -->
+    <div class="mt-8 grid gap-4 lg:grid-cols-3">
+      <div class="rounded-xl border border-line bg-surface p-5 lg:col-span-2">
+        <p class="eyebrow text-muted">Endpoint ที่ทดลอง</p>
+        <pre
+          class="mt-3 rounded-lg bg-code px-4 py-3 text-code-ink"
+        ><span class="th">GET</span> https://gateway.api.bot.or.th/Stat-ReferenceRate/v2<span class="tk">/DAILY_REF_RATE/</span>
+    ?start_period=<span class="ts">YYYY-MM-DD</span>&amp;end_period=<span class="ts">YYYY-MM-DD</span>
+<span class="tk">Authorization</span>: $BOT_API_KEY</pre>
+      </div>
+      <div
+        class="grid content-start gap-2 rounded-xl border border-line bg-surface p-5"
+      >
+        <p class="eyebrow text-muted">ผลรวม</p>
+        <div class="flex items-center justify-between text-sm">
+          <span>request ทั้งหมด</span
+          ><span class="font-mono font-semibold">18</span>
+        </div>
+        <div class="flex items-center justify-between text-sm">
+          <span>ตรงกับ spec</span
+          ><span class="font-mono font-semibold text-ok">5</span>
+        </div>
+        <div class="flex items-center justify-between text-sm">
+          <span>เรื่องที่ spec ไม่บอก</span
+          ><span class="font-mono font-semibold text-warn">4</span>
+        </div>
+        <div class="flex items-center justify-between text-sm">
+          <span>spec ผิด</span
+          ><span class="font-mono font-semibold text-bad">2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- key findings -->
+    <h3 class="mt-12 font-display text-xl font-semibold">ข้อค้นพบหลัก</h3>
+    <div class="mt-4 grid gap-4 md:grid-cols-2" id="findings"></div>
+
+    <!-- experiment log -->
+    <div class="mt-14 flex flex-wrap items-end justify-between gap-3">
+      <h3 class="font-display text-xl font-semibold">บันทึกการทดลอง</h3>
+      <div class="flex flex-wrap gap-2 text-xs" id="expIndex"></div>
+    </div>
+    <div class="mt-5 grid gap-6" id="exps"></div>
+  </div>
+</section>
+
+<!-- ===================== impact ===================== -->
+<section id="impact" class="gutter">
+  <div class="mx-auto max-w-6xl py-14">
+    <div
+      class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-end"
+    >
+      <div>
+        <p class="eyebrow text-accent">สรุป</p>
+        <h2 class="mt-2 font-display text-3xl font-bold">
+          กฎที่ได้สำหรับโค้ดและ CLAUDE.md
+        </h2>
+      </div>
+      <p class="text-muted">
+        รวมสิ่งที่ต้องบอก AI agent ให้ชัดก่อนเริ่มเขียนโค้ด
+        แต่ละข้อลิงก์กลับไปที่หลักฐาน
+      </p>
+    </div>
+    <ol class="mt-8 grid gap-3 md:grid-cols-2" id="rules"></ol>
+    <p class="mt-12 border-t border-line pt-4 text-xs text-muted">
+      ต้นฉบับคือ observations.md ในโปรเจกต์ ถ้าแก้ md แล้วต้องทำหน้านี้ใหม่
+    </p>
+  </div>
+</section>
+
+<script>
+  (function () {
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    /* =========================================================
+     PART 1 · study notes
+     ========================================================= */
+    const cats = [
+      {
+        id: "c-brief",
+        name: "เข้าใจโจทย์",
+        desc: "งานนี้คืออะไร และเขาวัดอะไรจริงๆ",
+        qs: [1, 3, 6],
+      },
+      {
+        id: "c-data",
+        name: "API และข้อมูล",
+        desc: "ข้อมูลหน้าตาแบบไหน ดึงยังไง",
+        qs: [2, 4, 12, 15, 16],
+      },
+      {
+        id: "c-store",
+        name: "การเก็บลง SQLite",
+        desc: "กันข้อมูลซ้ำ ตาราง และที่วางไฟล์",
+        qs: [5, 11, 8, 9, 10],
+      },
+      {
+        id: "c-setup",
+        name: "เครื่องมือและการตั้งค่า",
+        desc: "uv และการขอ API key",
+        qs: [7, 13, 14],
+      },
+    ];
+
+    const note = (label, html) =>
+      `<div class="rounded-lg border-l-[3px] border-warn bg-warn-soft px-4 py-3 text-[15px]"><b class="text-warn">${label}</b> ${html}</div>`;
+    const pre = (s) =>
+      `<pre class="rounded-lg bg-code px-4 py-3 text-code-ink">${s}</pre>`;
+    const table = (head, rows) =>
+      `<div class="overflow-x-auto rounded-lg border border-line bg-surface"><table class="tbl"><thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map((r) => `<tr>${r.map((c, i) => `<td${i === 0 ? ' class="font-medium"' : ""}>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+
+    const Q = {
+      1: {
+        q: "โปรเจกต์นี้คืออะไร ให้เห็นภาพ",
+        a: `
+      <p>สคริปต์ Python ที่รันแล้วไปดึงเรต USD/THB รายวันจาก ธปท. มาเก็บลง SQLite แล้วแพ็กขึ้น GitHub ให้คนอื่น clone ไปรันต่อได้</p>
+      <div class="flex flex-wrap items-center gap-2 font-mono text-xs">
+        <span class="rounded-md border border-line bg-surface px-2.5 py-1">uv run</span><span class="text-muted">→</span>
+        <span class="rounded-md border border-line bg-surface px-2.5 py-1">BOT API</span><span class="text-muted">→</span>
+        <span class="rounded-md border border-line bg-surface px-2.5 py-1">แปลง + ตรวจ + กันซ้ำ</span><span class="text-muted">→</span>
+        <span class="rounded-md border border-accent bg-accent-soft px-2.5 py-1 text-accent">SQLite</span>
+      </div>
+      <p>ใน repo ต้องมี CLAUDE.md, README.md, คู่มือ .html และ NOTES.md</p>`,
+      },
+
+      2: {
+        q: "ข้อมูลที่ได้จาก API หน้าตาแบบไหน",
+        a: `
+      <p>JSON ซ้อนกันสามชั้น ข้อมูลที่ใช้จริงอยู่ที่ <code>result.data.data_detail</code> เป็น array ที่แต่ละตัวมีแค่ <code>period</code> กับ <code>rate</code> ส่วน <code>data_header</code> เป็นคำอธิบายรายงาน ไม่ต้องใช้</p>
+      <ul>
+        <li><code>rate</code> มาเป็น string ต้องแปลงเป็นตัวเลขก่อน</li>
+        <li>ไม่ควรเชื่อว่า array เรียงลำดับมาแล้ว ให้ sort เอง</li>
+        <li>ถ้ารันก่อน 18:00 จะยังไม่มีข้อมูลของวันนั้น</li>
+      </ul>
+      <p class="text-sm text-muted">ยืนยันแล้วใน <a class="text-accent hover:underline" href="#exp-1">EXP-1</a></p>`,
+      },
+
+      3: {
+        q: "ทำไม rate เป็นรายวัน ไม่วิ่งทุกวินาทีแบบหุ้น",
+        tags: ["NOTES (a)"],
+        a: `
+      <div class="grid gap-3 sm:grid-cols-2">
+        <div class="rounded-lg border border-line bg-surface p-4"><p class="font-semibold">Spot rate</p><p class="mt-1 text-sm text-muted">ขยับทุกวินาที ใช้ตั้งราคาหรือเทรดแบบเรียลไทม์</p></div>
+        <div class="rounded-lg border border-accent bg-accent-soft p-4"><p class="font-semibold text-accent">Weighted-average reference rate</p><p class="mt-1 text-sm">ตัวในโจทย์ ธปท. เอารายการ USD ระหว่างธนาคารที่มูลค่า ≥ 1 ล้านดอลลาร์ทั้งวันมาเฉลี่ยถ่วงน้ำหนักด้วยปริมาณ ได้วันละตัวเลขเดียว คล้าย VWAP ของทั้งวัน</p></div>
+      </div>
+      <p>เรตรายวันมีไว้ให้ทุกฝ่ายอ้างอิงตัวเลขเดียวกัน เช่น งานบัญชี ศุลกากร ภาษี และสัญญา</p>
+      ${note("ข้อแก้ไข:", "ตอนแรกคิดว่าข้อมูลนี้ใช้คำนวณราคาทอง ซึ่งไม่น่าใช่ ราคาทองหน้าร้านหรือบนแอปเทรดต้องใช้ spot rate เรตรายวันของ ธปท. เหมาะกับงาน back office มากกว่า เช่น ตีมูลค่าสต็อกหรือตำแหน่งที่ถือเป็น USD ตอนสิ้นวัน งานนำเข้าส่งออกทอง และรายงานผู้บริหาร")}`,
+      },
+
+      4: {
+        q: "ยิงครั้งเดียวได้ข้อมูลย้อนหลัง 20 วันเลยไหม",
+        fixed: true,
+        a: `
+      <p>API ส่งกลับทุกวันทำการในช่วงที่ขอ แต่ 20 วันทำการกินเวลาจริงประมาณ 4 สัปดาห์ และนานกว่านั้นถ้ามีวันหยุด (ธ.ค. มีวันหยุด 5 และ 10 ธ.ค.)</p>
+      <p>วิธีที่ปลอดภัย:</p>
+      <ol>
+        <li>ขอข้อมูลย้อนหลังเผื่อไว้ เช่น 45 วัน</li>
+        <li>sort ตาม <code>period</code></li>
+        <li>ตัดเอา 20 ตัวล่าสุด</li>
+        <li>ถ้าได้ไม่ถึง 20 ตัว ให้ log เตือน อย่าปล่อยผ่านเงียบๆ</li>
+      </ol>
+      <p>ไม่ต้องเขียนโค้ดคำนวณวันหยุดเอง</p>
+      ${note("แก้หลังทดลอง:", `ขอ 45 วันในครั้งเดียวไม่ได้ API จำกัดช่วงไว้ที่ 31 วัน ต้องยิง 2 ช่วงต่อกันแล้วรวมผล ดู <a class="underline" href="#exp-2">EXP-2</a> และ <a class="underline" href="#f-limit">ข้อค้นพบ</a>`)}`,
+      },
+
+      5: {
+        q: "ยิงซ้ำก็ได้ราคาเดิมใช่ไหม",
+        tags: ["NOTES (b)"],
+        a: `
+      <p>ใช่ ข้อมูลย้อนหลังเป็นตัวเลขที่ปิดไปแล้ว สิ่งที่เปลี่ยนมีแค่ช่วงที่เลื่อนไปข้างหน้าเมื่อมีวันทำการใหม่</p>
+      <p>คำว่า <b>"append" ในโจทย์คือกับดัก</b> append ตรงๆ รันสองรอบจะได้ 40 แถว ทางแก้คือให้ <code>period</code> เป็น PRIMARY KEY แล้วใช้ upsert</p>
+      ${pre(`<span class="th">INSERT INTO</span> rates (period, rate) <span class="th">VALUES</span> (?, ?)
+<span class="th">ON CONFLICT</span>(period) <span class="th">DO UPDATE SET</span> rate = excluded.rate;`)}
+      <p>เลือก upsert แทน <code>INSERT OR IGNORE</code> เพราะถ้าแหล่งข้อมูลแก้ตัวเลขย้อนหลัง ข้อมูลของเราจะตามได้ (ยังไม่มีหลักฐานว่า ธปท. เคยแก้ย้อนหลังจริง ทำไว้กันไว้ก่อน)</p>
+      <p>คุณสมบัติที่รันกี่รอบผลก็เหมือนเดิมเรียกว่า <b>idempotent</b></p>`,
+      },
+
+      6: {
+        q: "เขาแค่ต้องการให้ดึง rate มาเก็บ SQLite แค่นั้นเหรอ",
+        a: `
+      <p>ถ้าดูแค่ตัวงานก็ใช่ โค้ดน่าจะไม่เกิน 100 บรรทัด แต่โจทย์ง่ายแบบนี้ตั้งใจให้โค้ดไม่ใช่ตัวคัดคน สิ่งที่เขาวัดจริงคือ</p>
+      ${table(
+        ["สิ่งที่ส่ง", "สิ่งที่เขาดูจริงๆ"],
+        [
+          ["NOTES.md", "เห็นจุดที่โจทย์ไม่ชัดไหม และตัดสินใจอย่างมีเหตุผลไหม"],
+          ["CLAUDE.md", "ควบคุม AI agent เป็นไหม (JD ข้อ 1)"],
+          [
+            "README + คู่มือ .html",
+            "ส่งมอบงานให้คนอื่นใช้ต่อได้ไหม (JD ข้อ 2)",
+          ],
+          ["การสัมภาษณ์", "อธิบายโค้ดที่ AI เขียนได้ไหม"],
+        ],
+      )}
+      <p>ไม่ควรทำเกินโจทย์ เช่น dashboard, scheduler หรือ Docker</p>`,
+      },
+
+      7: {
+        q: "<code>uv sync</code> / <code>uv run</code> คืออะไร ต่างจาก <code>npm run dev</code> ไหม",
+        a: `
+      <p>uv รวมหน้าที่ของ npm, nvm และ node_modules ไว้ในตัวเดียว</p>
+      ${table(
+        ["uv", "เทียบฝั่ง JS"],
+        [
+          ["<code>pyproject.toml</code>", "<code>package.json</code>"],
+          ["<code>uv.lock</code>", "<code>package-lock.json</code>"],
+          ["<code>.venv/</code>", "<code>node_modules/</code>"],
+          [
+            "<code>uv sync</code>",
+            "<code>npm ci</code> และลงเวอร์ชัน Python ที่ต้องใช้ให้ด้วย",
+          ],
+          [
+            "<code>uv add httpx</code><br><code>uv add --dev pytest</code>",
+            "<code>npm install</code><br><code>npm install -D</code>",
+          ],
+          [
+            "<code>uv run &lt;คำสั่ง&gt;</code>",
+            "<code>npx</code> / <code>node</code> แต่ sync ให้อัตโนมัติก่อนรัน",
+          ],
+        ],
+      )}
+      <p><code>npm run dev</code> เรียก script ที่ตั้งชื่อไว้ใน <code>package.json</code> ส่วน <code>uv run</code> รันคำสั่งอะไรก็ได้ในสภาพแวดล้อมของโปรเจกต์ ถ้าอยากได้ชื่อสั้นๆ ให้ประกาศ entry point ใน <code>pyproject.toml</code></p>
+      <p>โหลด <code>.env</code> ได้ด้วย <code>uv run --env-file .env ...</code> โดยไม่ต้องลง <code>python-dotenv</code></p>`,
+      },
+
+      8: {
+        q: "ไม่ควรเก็บไฟล์ .db ไว้ใน <code>.venv</code> ใช่ไหม",
+        a: `
+      <p>ถ้าเป็นงานจริง ไม่ควร <code>.venv</code> มีไว้เก็บ library เท่านั้น ลบแล้วสร้างใหม่ได้ตลอด เทียบฝั่ง JS ก็คือการเก็บฐานข้อมูลไว้ใน <code>node_modules</code> ที่ที่ถูกคือ <code>data/</code> ที่ใส่ไว้ใน <code>.gitignore</code></p>
+      <p><b>แต่ในข้อสอบนี้ให้ทำตามโจทย์</b> เพราะเขาอาจมีเหตุผลหรือมีระบบตรวจอัตโนมัติ ให้ตั้ง default ตามโจทย์ ให้เปลี่ยน path ได้ผ่าน <code>BOT_DB_PATH</code> แล้วเขียนเหตุผลไว้ใน NOTES</p>`,
+      },
+
+      9: {
+        q: "ข้อไหนในโจทย์บอกให้เก็บใน <code>.venv</code>",
+        tags: ["NOTES"],
+        a: `
+      <blockquote class="border-l-[3px] border-line pl-4 text-muted">ตารางข้อ 1 แถว "ปลายทาง": append ลง SQLite ชื่อ bot_api_daily_{ชื่อผู้สมัคร_Eng}.db วางไว้ใน .venv ของ project</blockquote>
+      <p>พอดูคู่กับข้อ <b>2.2</b> ที่ให้แนบไฟล์ .db มาทางอีเมล จึงน่าจะเป็นเพราะ <code>.venv</code> อยู่ใน <code>.gitignore</code> อยู่แล้ว ไฟล์ข้อมูลจะไม่หลุดขึ้น repo สาธารณะ เชื่อมสองข้อนี้ใน NOTES ได้</p>`,
+      },
+
+      10: {
+        q: "ถ้าเขา clone ไปรันเอง ข้อมูลของเขากับของเราจะเหมือนกันไหม",
+        a: `
+      ${table(
+        ["ส่วนของข้อมูล", "ผลเทียบกัน"],
+        [
+          ["วันที่ตรงกัน", "เรตเหมือนกัน"],
+          ["ช่วงวันที่", "เลื่อนตามวันที่รัน ทับกันแค่บางช่วง"],
+          ["วันล่าสุด", "อาจต่างกันถ้าคนหนึ่งรันก่อน 18:00"],
+          ["<code>fetched_at</code>", "ต่างกันแน่นอน"],
+        ],
+      )}
+      <p>นี่อธิบายว่าทำไมข้อ 2.2 ให้ส่งไฟล์ .db ที่รันจริงมาด้วย ใช้เป็นจุดตรวจได้ว่าวันที่ทับกันต้องมีเรตตรงกัน ถ้าไม่ตรงแปลว่า parse ผิดหรือ timezone ผิด</p>`,
+      },
+
+      11: {
+        q: "ตารางใน db มีคอลัมน์อะไรบ้าง",
+        a: `
+      ${pre(`<span class="th">CREATE TABLE IF NOT EXISTS</span> rates (
+    period      <span class="tk">TEXT PRIMARY KEY</span>,   <span class="tc">-- 'YYYY-MM-DD' เรียงตามตัวอักษรแล้วได้ลำดับตามวันที่</span>
+    rate        <span class="tk">REAL NOT NULL</span>,      <span class="tc">-- หรือ TEXT (ดูด้านล่าง)</span>
+    fetched_at  <span class="tk">TEXT NOT NULL</span>       <span class="tc">-- ISO8601 +07:00</span>
+);`)}
+      <p><b>ต้องตัดสินใจเอง:</b> <code>rate</code> จะเป็น REAL (คำนวณใน SQL ได้ ความแม่นยำราว 15 หลัก พอสำหรับ 7 ทศนิยม) หรือ TEXT (ตรงตามต้นทาง 100% แต่ต้อง CAST ทุกครั้งก่อนคำนวณ)</p>
+      <p>ตั้งใจไม่ใส่ <code>currency_pair</code>, <code>source</code> และตาราง log การรัน เพราะเกินขอบเขตโจทย์</p>`,
+      },
+
+      12: {
+        q: "ควรยิง API ดู response ก่อนเขียน CLAUDE.md ไหม",
+        a: `
+      <p>ควร ถ้าเขียนกฎจากข้อมูลที่ยังไม่ยืนยัน agent จะเขียนโค้ดตามของที่ผิด <b>ส่วนที่ 3 ทั้งหมดมาจากคำถามข้อนี้</b> และเจอ 4 เรื่องที่ spec ไม่ได้บอก</p>
+      <p>หลังยิงแล้ว: เก็บ response ไว้เป็น <code>tests/fixtures/sample_response.json</code> เช็กโครงสร้าง ชนิดของ <code>rate</code> ลำดับวันที่ จำนวนแถว และหน้าตา error</p>
+      <p class="text-sm"><a class="font-medium text-accent hover:underline" href="#part2">ไปที่ส่วนที่ 3 ทดลองยิง API →</a></p>`,
+      },
+
+      13: {
+        q: "ขอ API key ยังไง",
+        a: `
+      <p>ตามคู่มือที่ portal.api.bot.or.th/manual</p>
+      <ol>
+        <li>Log in → Sign up Now → ยืนยันอีเมล → ตั้งรหัสผ่าน</li>
+        <li>Catalogues → Exchange Rates → Overview → Access with this plan</li>
+        <li>ไอคอนตะกร้า → Create a new app → Submit Request</li>
+        <li>Profile → My apps → เลือก app → Copy token (ต้องรอให้คำขอได้รับอนุมัติก่อน)</li>
+      </ol>
+      ${note("สำคัญ:", "ระบบใหม่ใช้ <code>Authorization</code> ส่วนระบบเก่าใช้ <code>X-IBM-Client-Id</code> บทความและโค้ดตัวอย่างบนเน็ตส่วนใหญ่ยังเป็นของระบบเก่า AI จึงมีโอกาสเขียน header ผิด")}`,
+      },
+
+      14: {
+        q: "ตั้งชื่อ app อะไรดี",
+        a: `
+      <p>ชื่ออะไรก็ได้ ใช้แค่แยก app ในบัญชีเรา เช่น <code>mts-takehome-fx-rate</code></p>
+      <p>คำอธิบาย: "Fetch daily THB/USD weighted-average interbank rate into SQLite"</p>`,
+      },
+
+      15: {
+        q: "ใน product มี API หลายเส้น ต้องใช้เส้นไหน",
+        a: `
+      <p>โจทย์ระบุไว้แล้วว่าใช้ <code>DAILY_REF_RATE</code> เส้นเดียว API ตัวเดียวแบ่งเป็นสี่เส้นตามความถี่ คือ DAILY, MONTHLY, QUARTERLY และ ANNUAL</p>
+      ${note("ระวัง:", "spec แรกที่โหลดมาเป็นของ API อีกตัว (Average Exchange Rate, <code>Stat-ExchangeRate</code>) ไม่ใช่ตัวที่โจทย์ต้องการ ให้ดูที่ path <code>/Stat-ReferenceRate/v2/DAILY_REF_RATE/</code> เป็นหลัก")}`,
+      },
+
+      16: {
+        q: "ExchangeRate กับ ReferenceRate ต่างกันยังไง",
+        tags: ["NOTES"],
+        fixed: true,
+        a: `
+      ${table(
+        ["", "ReferenceRate (ตัวที่ใช้)", "ExchangeRate"],
+        [
+          ["ซื้อขายระหว่าง", "ธนาคารกับธนาคาร (interbank)", "ธนาคารกับลูกค้า"],
+          [
+            "คำนวณจาก",
+            "รายการ ≥ 1 ล้าน USD เฉลี่ยถ่วงน้ำหนักด้วยปริมาณ",
+            "ค่าเฉลี่ยอัตราที่ธนาคารพาณิชย์ประกาศ",
+          ],
+          ["สกุลเงิน", "USD อย่างเดียว", "19 สกุล"],
+          [
+            "ฟิลด์",
+            "<code>rate</code> ตัวเดียว",
+            "<code>buying_sight</code>, <code>buying_transfer</code>, <code>selling</code>, <code>mid_rate</code>",
+          ],
+          [
+            "เทียบได้กับ",
+            "ราคาขายส่ง",
+            "ราคาหน้าเคาน์เตอร์ (มีส่วนต่างซื้อขาย)",
+          ],
+        ],
+      )}
+      <p><b>เอกสารของ ธปท. มีจุดผิด</b></p>
+      <ul>
+        <li>spec ของ ReferenceRate ค่าตัวอย่าง <code>report_name_eng</code> เป็นชื่อรายงานของ ExchangeRate</li>
+        <li>spec ของ ExchangeRate ค่าตัวอย่าง <code>api</code> เป็นชื่อของ ReferenceRate</li>
+        <li><code>data_detail</code> ของเส้นรายวันประกาศชนิดเป็น <code>object</code> แต่ตัวอย่างเป็น array</li>
+      </ul>
+      ${note("แก้หลังทดลอง:", `response จริงก็ส่ง <code>report_name_eng</code> เป็นชื่อรายงานของ ExchangeRate แปลว่าบั๊กอยู่ที่ระบบของ ธปท. เอง ไม่ได้ผิดแค่ในเอกสาร และ <code>data_detail</code> จริงเป็น array ดู <a class="underline" href="#exp-1">EXP-1</a>`)}
+      <p>สรุป: ยึด response จริงเป็นหลัก ไม่เชื่อ spec อย่างเดียว</p>`,
+      },
+    };
+
+    $("catIndex").innerHTML = cats
+      .map(
+        (c) => `
+    <a href="#${c.id}" class="grid gap-1 rounded-xl border border-line bg-surface p-4 transition hover:border-accent">
+      <span class="flex items-baseline justify-between gap-2"><span class="font-display font-semibold">${c.name}</span><span class="font-mono text-xs text-muted">${c.qs.length} ข้อ</span></span>
+      <span class="text-sm text-muted">${c.desc}</span>
+    </a>`,
+      )
+      .join("");
+
+    $("qa").innerHTML = cats
+      .map(
+        (c) => `
+    <div id="${c.id}" class="grid gap-0">
+      <div class="flex items-baseline gap-3 border-b-2 border-ink pb-3">
+        <h3 class="font-display text-2xl font-semibold">${c.name}</h3>
+        <span class="text-sm text-muted">${c.desc}</span>
+      </div>
+      ${c.qs
+        .map((n) => {
+          const it = Q[n];
+          const tags =
+            (it.tags || [])
+              .map(
+                (t) =>
+                  `<span class="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-semibold text-accent">${t}</span>`,
+              )
+              .join("") +
+            (it.fixed
+              ? `<span class="rounded-full bg-warn-soft px-2 py-0.5 text-xs font-semibold text-warn">แก้หลังทดลอง</span>`
+              : "");
+          return `
+        <article id="q${n}" class="grid gap-4 border-b border-line py-8 md:grid-cols-[minmax(0,5fr)_minmax(0,8fr)] md:gap-10">
+          <div class="grid content-start gap-3">
+            <span class="font-mono text-sm text-muted">Q${String(n).padStart(2, "0")}</span>
+            <h4 class="font-display text-xl font-semibold leading-snug">${it.q}</h4>
+            ${tags ? `<div class="flex flex-wrap gap-1.5">${tags}</div>` : ""}
+          </div>
+          <div class="ans max-w-[68ch]">${it.a}</div>
+        </article>`;
+        })
+        .join("")}
+    </div>`,
+      )
+      .join("");
+
+    /* =========================================================
+     PART 2 · API lab
+     ========================================================= */
+    const findings = [
+      {
+        id: "f-limit",
+        kind: "spec ไม่บอก",
+        title: "ขอได้ไม่เกิน 31 วันต่อครั้ง",
+        body: "<code>end − start</code> ต้องไม่เกิน 31 วัน เกินได้ 400 แผนขอ 45 วันในครั้งเดียวจึงใช้ไม่ได้ ต้องยิงสองช่วงต่อกัน",
+        ref: ["EXP-2", "EXP-3"],
+      },
+      {
+        id: "f-empty",
+        kind: "spec ไม่บอก",
+        title: "วันที่ไม่มีข้อมูลได้แถวว่าง ไม่ใช่ array ว่าง",
+        body: 'เสาร์อาทิตย์ วันหยุดราชการ และวันในอนาคต ได้ 200 กับ <code>[{"period":"","rate":""}]</code> ถ้าไม่กรองทิ้ง <code>float("")</code> จะพัง',
+        ref: ["EXP-4"],
+      },
+      {
+        id: "f-errors",
+        kind: "spec ไม่บอก",
+        title: "Error แต่ละแบบใช้ body คนละรูปแบบ",
+        body: "401/403 ใช้ <code>{error}</code> 400 ใช้ <code>{httpCode, moreInformation}</code> 404 ใช้ <code>{Message}</code> ต้องตัดสินจาก status code",
+        ref: ["EXP-5", "EXP-6"],
+      },
+      {
+        id: "f-ratelimit",
+        kind: "spec ไม่บอก",
+        title: "Header X-RateLimit ใช้ไม่ได้",
+        body: "ยิงสำเร็จแต่ได้ <code>X-RateLimit-Limit: -1</code> และ <code>Remaining: 0</code> ถ้าโค้ดเชื่อ header นี้จะคิดว่าโควตาหมดทั้งที่ยังไม่หมด",
+        ref: ["EXP-1"],
+      },
+      {
+        id: "f-shape",
+        kind: "spec ผิด",
+        title: "data_detail เป็น array ไม่ใช่ object",
+        body: "spec ประกาศชนิดเป็น <code>object</code> แต่ response จริงเป็น array ของ <code>{period, rate}</code> เรียงจากใหม่ไปเก่า",
+        ref: ["EXP-1"],
+      },
+      {
+        id: "f-name",
+        kind: "spec ผิด",
+        title: "ชื่อรายงานใน response เป็นของอีก API",
+        body: "<code>report_name_eng</code> เป็นชื่อรายงานของ ExchangeRate ทั้งที่เรียก ReferenceRate บั๊กนี้อยู่ใน response จริง ไม่ใช่แค่ใน spec และ ExchangeRate ก็ส่ง <code>api</code> เป็นชื่อของ ReferenceRate กลับมา ชื่อสลับกันทั้งสองทาง จึงไม่ควรใช้ <code>data_header</code> หรือ <code>api</code> ระบุว่าข้อมูลมาจากไหน",
+        ref: ["EXP-1", "EXP-7"],
+      },
+    ];
+    const kindCls = (k) =>
+      k === "spec ผิด" ? "bg-bad-soft text-bad" : "bg-warn-soft text-warn";
+    $("findings").innerHTML = findings
+      .map(
+        (f) => `
+    <article id="${f.id}" class="grid content-start gap-2 rounded-xl border border-line bg-surface p-5">
+      <span class="w-fit rounded-full px-2 py-0.5 text-xs font-semibold ${kindCls(f.kind)}">${f.kind}</span>
+      <h4 class="font-display text-lg font-semibold leading-snug">${f.title}</h4>
+      <p class="text-[15px]">${f.body}</p>
+      <p class="flex flex-wrap gap-2 pt-1 font-mono text-xs">${f.ref.map((r) => `<a href="#exp-${r.split("-")[1]}" class="rounded border border-line px-1.5 py-0.5 text-muted hover:border-accent hover:text-accent">${r}</a>`).join("")}</p>
+    </article>`,
+      )
+      .join("");
+
+    /* JSON / HTTP highlighter: single pass over escaped text so inserted markup is never re-scanned */
+    const hl = (s) =>
+      esc(s).replace(
+        /(^[ \t]*\/\/.*$)|("(?:[^"\\\n]|\\.)*")(\s*:)?|\b(GET|HTTP\/1\.1)\b|^([A-Za-z-]+)(:)/gm,
+        (m, com, str, colon, kw, hk, hc) =>
+          com
+            ? `<span class="tc">${com}</span>`
+            : str
+              ? colon
+                ? `<span class="tk">${str}</span>${colon}`
+                : `<span class="ts">${str}</span>`
+              : kw
+                ? `<span class="th">${kw}</span>`
+                : `<span class="tk">${hk}</span>${hc}`,
+      );
+
+    const statusCls = (s) =>
+      s < 300
+        ? "bg-ok-soft text-ok"
+        : s === 400
+          ? "bg-warn-soft text-warn"
+          : "bg-bad-soft text-bad";
+    const statusText = {
+      200: "OK",
+      400: "Bad Request",
+      401: "Unauthorized",
+      403: "Forbidden",
+      404: "Not Found",
+    };
+    const pill = (s) =>
+      `<span class="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-mono text-xs font-semibold ${statusCls(s)}">${s} <span class="font-normal opacity-80">${statusText[s]}</span></span>`;
+
+    const okBody = `{
+  "result": {
+    "timestamp": "2026-11-26 21:20:23",
+    "api": "Daily Weighted-average Interbank Exchange Rate - THB / USD",
+    "data": {
+      "data_header": {
+        "report_name_eng": "Rates of Exchange of Commercial Banks in Bangkok Metropolis (2002-present)",
+        "report_name_th": "อัตราแลกเปลี่ยนเฉลี่ยของธนาคารพาณิชย์ในกรุงเทพมหานคร (2545-ปัจจุบัน)",
+        "report_uoq_name_eng": "(Unit: Baht / 1 Unit of Foreign Currency)",
+        "report_uoq_name_th": "(หน่วย: บาท ต่อ 1 หน่วยเงินตราต่างประเทศ)",
+        "report_source_of_data": [
+          { "source_of_data_eng": "Bank of Thailand", "source_of_data_th": "ธนาคารแห่งประเทศไทย" }
+        ],
+        "report_remark": [],
+        "last_updated": "2026-11-26"
+      },
+      "data_detail": [
+        { "period": "2026-11-26", "rate": "34.0140000" },
+        { "period": "2026-11-25", "rate": "34.0250000" },
+        { "period": "2026-11-24", "rate": "33.9440000" },
+        // ... อีก 20 แถว (ดูตารางด้านล่าง)
+        { "period": "2026-10-26", "rate": "33.7920000" }
+      ]
+    }
+  }
+}`;
+    const emptyBody = `{
+  "result": {
+    "timestamp": "2026-11-26 21:20:34",
+    "api": "Daily Weighted-average Interbank Exchange Rate - THB / USD",
+    "data": {
+      "data_header": { "last_updated": "2026-11-26", ... },
+      "data_detail": [
+        { "period": "", "rate": "" }
+      ]
+    }
+  }
+}`;
+    const err400 = (m) => `{
+  "httpCode": "400",
+  "httpMessage": "Bad Request",
+  "moreInformation": [
+    { "message": "${m}" }
+  ]
+}`;
+
+    const exps = [
+      {
+        n: 1,
+        group: "ดึงข้อมูลปกติ",
+        title: "ขอช่วง 31 วัน",
+        goal: "ดูโครงสร้าง response จริง เทียบกับ spec",
+        reqs: [{ q: "start_period=2026-10-26&end_period=2026-11-26", s: 200 }],
+        auth: "Authorization: $BOT_API_KEY\naccept: application/json",
+        headers: `HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Content-Length: 1905
+X-RateLimit-Limit: -1
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 0
+Cache-Control: max-age=0, no-cache, no-store`,
+        body: okBody,
+        table: true,
+        notes: [
+          [
+            "ok",
+            "<code>data_detail</code> เป็น array จริง ตรงกับตัวอย่าง แต่ไม่ตรงกับชนิดที่ spec ประกาศ (<code>object</code>)",
+          ],
+          ["ok", "<code>rate</code> เป็น string ทศนิยม 7 ตำแหน่ง ต้องแปลงเอง"],
+          [
+            "ok",
+            "ได้ 24 วันทำการ เรียงจากใหม่ไปเก่า ไม่มีเสาร์อาทิตย์และไม่มี 23 ต.ค. (วันปิยมหาราช)",
+          ],
+          ["ok", "ยิงตอน 21:20 น. ได้เรตของวันนั้นแล้ว (ประกาศ 18:00 น.)"],
+          [
+            "bad",
+            "<code>report_name_eng</code> เป็นชื่อรายงานของ ExchangeRate บั๊กเดียวกับใน spec",
+          ],
+          [
+            "warn",
+            "<code>X-RateLimit-Remaining: 0</code> ทั้งที่ยิงผ่าน และ <code>Limit: -1</code> ใช้ตัดสินโควตาไม่ได้",
+          ],
+          [
+            "info",
+            "<code>timestamp</code> ไม่มี timezone แต่ตรงกับเวลาไทย (header <code>Date</code> เป็น 14:20 GMT)",
+          ],
+          ["info", "เวลาตอบ 0.3–1.9 วินาที"],
+        ],
+      },
+      {
+        n: 2,
+        group: "ขอบเขตช่วงวันที่",
+        title: "ขอช่วง 45 วัน ตามแผนเดิม",
+        goal: "ตรวจว่าขอย้อนหลังเผื่อวันหยุดในครั้งเดียวได้ไหม",
+        reqs: [{ q: "start_period=2026-10-12&end_period=2026-11-26", s: 400 }],
+        auth: "Authorization: $BOT_API_KEY",
+        body: err400("Exceed limit period. Limit period is 31 days"),
+        notes: [
+          ["warn", "API จำกัดช่วงต่อครั้ง spec ไม่ได้บอกข้อนี้เลย"],
+          ["warn", "แผนในข้อ Q04 ต้องเปลี่ยนเป็นยิงหลายช่วงแล้วรวมผล"],
+        ],
+      },
+      {
+        n: 3,
+        group: "ขอบเขตช่วงวันที่",
+        title: "หาขอบของ 31 วัน",
+        goal: "ให้ end_period คงที่ แล้วขยับ start_period ทีละวัน",
+        reqs: [
+          {
+            q: "start_period=2026-10-25&end_period=2026-11-26",
+            s: 400,
+            d: "32 วัน",
+          },
+          {
+            q: "start_period=2026-10-26&end_period=2026-11-26",
+            s: 200,
+            d: "31 วัน",
+          },
+          {
+            q: "start_period=2026-10-27&end_period=2026-11-26",
+            s: 200,
+            d: "30 วัน",
+          },
+        ],
+        auth: "Authorization: $BOT_API_KEY",
+        notes: [
+          [
+            "ok",
+            "สรุปว่า <code>end − start ≤ 31 วัน</code> (นับรวมทั้งสองฝั่งได้ 32 วันปฏิทิน)",
+          ],
+          [
+            "info",
+            "31 วันได้ 24 วันทำการในช่วงนี้ แต่ช่วงที่วันหยุดเยอะ เช่น ปลาย ธ.ค. ถึงต้น ม.ค. อาจได้ไม่ถึง 20",
+          ],
+        ],
+      },
+      {
+        n: 4,
+        group: "วันที่ไม่มีข้อมูล",
+        title: "ช่วงที่ไม่มีวันทำการ",
+        goal: "ดูว่าไม่มีข้อมูลแล้ว API ตอบอะไร",
+        reqs: [
+          {
+            q: "start_period=2026-11-21&end_period=2026-11-22",
+            s: 200,
+            d: "เสาร์–อาทิตย์",
+          },
+          {
+            q: "start_period=2026-10-23&end_period=2026-10-23",
+            s: 200,
+            d: "วันปิยมหาราช",
+          },
+          {
+            q: "start_period=2026-12-01&end_period=2026-12-31",
+            s: 200,
+            d: "อนาคต",
+          },
+        ],
+        auth: "Authorization: $BOT_API_KEY",
+        body: emptyBody,
+        notes: [
+          [
+            "warn",
+            "ทั้งสามกรณีได้ 200 และแถวว่างหนึ่งแถว ไม่ใช่ <code>[]</code>",
+          ],
+          [
+            "warn",
+            "ต้องกรองแถวที่ <code>period</code> หรือ <code>rate</code> ว่างทิ้งก่อนแปลงหรือบันทึก",
+          ],
+          [
+            "ok",
+            "วันที่ในอนาคตไม่ error จึงส่ง <code>end_period</code> เป็นวันนี้ได้เสมอ ถึงจะรันก่อน 18:00",
+          ],
+        ],
+      },
+      {
+        n: 5,
+        group: "Authentication",
+        title: "รูปแบบ header Authorization",
+        goal: "ดูว่า gateway ตอบยังไงเมื่อ token ผิดหรือไม่มี",
+        reqs: [
+          {
+            q: "start_period=2026-11-01&end_period=2026-11-26",
+            s: 401,
+            d: "ไม่ส่ง header",
+            body: `{\n    "error": "Authorization field missing"\n}`,
+          },
+          {
+            q: "start_period=2026-11-21&end_period=2026-11-22",
+            s: 403,
+            d: "Authorization: abc",
+            body: `{\n    "error": "Access to this API has been disallowed"\n}`,
+          },
+          {
+            q: "start_period=2026-11-20&end_period=2026-11-26",
+            s: 200,
+            d: "Authorization: Bearer $BOT_API_KEY",
+            body: `{ "result": { ..., "data_detail": [\n  { "period": "2026-11-26", "rate": "34.0140000" },\n  ... 5 แถว\n] } }`,
+          },
+        ],
+        auth: "",
+        notes: [
+          [
+            "warn",
+            "ไม่มี key ได้ 401 แต่ key ผิดได้ 403 ควรแยกข้อความ log สองกรณีนี้ให้คนอ่านรู้ว่าต้องแก้อะไร",
+          ],
+          [
+            "info",
+            "ใส่ <code>Bearer</code> นำหน้าก็ได้ 200 แต่ให้ยึดแบบไม่มี Bearer ตาม spec",
+          ],
+        ],
+      },
+      {
+        n: 6,
+        group: "Parameter ผิด",
+        title: "ส่ง query params ผิดแบบต่างๆ",
+        goal: "ดูข้อความ error ของแต่ละกรณี",
+        reqs: [
+          {
+            q: "start_period=2026/11/01&end_period=2026-11-26",
+            s: 400,
+            d: "รูปแบบวันที่ผิด",
+            body: err400("Parameter: start_period format must be yyyy-mm-dd"),
+          },
+          {
+            q: "start_period=2026-11-26&end_period=2026-11-01",
+            s: 400,
+            d: "start มากกว่า end",
+            body: err400(
+              "Parameter start_period must not be greater than end_period",
+            ),
+          },
+          {
+            q: "",
+            s: 404,
+            d: "ไม่ส่ง params เลย",
+            body: `{\n  "Message": "No HTTP resource was found that matches the request URI 'https://api-ap-p.ibot.or.th:8443/Stat/Stat-ReferenceRate/api/V2_ReferenceRate/DAILY_REF_RATE/'."\n}`,
+          },
+        ],
+        auth: "Authorization: $BOT_API_KEY",
+        notes: [
+          [
+            "ok",
+            "400 ทุกกรณีใช้รูปแบบเดียวกัน ข้อความอยู่ที่ <code>moreInformation[0].message</code>",
+          ],
+          [
+            "warn",
+            "ไม่ส่ง params ได้ 404 แทน 400 และ body เป็นอีกรูปแบบ (<code>Message</code> ตัว M ใหญ่) พร้อมเผยชื่อ host ภายในของ ธปท.",
+          ],
+          [
+            "info",
+            "สร้างวันที่ด้วย <code>date.isoformat()</code> ก็จะไม่เจอ 400 รูปแบบวันที่",
+          ],
+        ],
+      },
+      {
+        n: 7,
+        group: "API อีกตัว (เพื่อเทียบ)",
+        title: "Average Exchange Rate ด้วย key เดียวกัน",
+        goal: "ดูว่า API ที่ไม่ได้ใช้ต่างจากตัวที่ใช้ยังไง และพฤติกรรมเหมือนกันไหม",
+        path: "/Stat-ExchangeRate/v2/DAILY_AVG_EXG_RATE/",
+        base: "https://gateway.api.bot.or.th/Stat-ExchangeRate/v2/DAILY_AVG_EXG_RATE/",
+        reqs: [
+          {
+            q: "start_period=2026-11-20&end_period=2026-11-26&currency=USD",
+            s: 200,
+            d: "USD 5 วันทำการ",
+          },
+          {
+            q: "start_period=2026-11-26&end_period=2026-11-26",
+            s: 200,
+            d: "ไม่ส่ง currency ได้ 19 สกุล",
+          },
+          {
+            q: "start_period=2026-11-21&end_period=2026-11-22&currency=USD",
+            s: 200,
+            d: "เสาร์–อาทิตย์",
+            body: `"data_detail": [\n  { "period": "", "currency_id": "USD",\n    "currency_name_eng": "USA : DOLLAR (USD) ",\n    "buying_sight": "", "buying_transfer": "",\n    "selling": "", "mid_rate": "" }\n]`,
+          },
+          {
+            q: "start_period=2026-10-12&end_period=2026-11-26&currency=USD",
+            s: 400,
+            d: "ช่วง 45 วัน",
+            body: err400("Exceed limit period. Limit period is 31 days"),
+          },
+          {
+            q: "start_period=2026-11-26&end_period=2026-11-26&currency=XYZ",
+            s: 400,
+            d: "สกุลที่ไม่มี",
+            body: err400("Invalid Currency"),
+          },
+        ],
+        auth: "Authorization: $BOT_API_KEY",
+        bodyLabel: " · ของครั้งแรก (USD 5 วันทำการ)",
+        body: `{
+  "result": {
+    "timestamp": "2026-11-26 22:15:00",
+    "api": "Daily Weighted-average Interbank Exchange Rate - THB / USD",
+    "data": {
+      "data_header": {
+        "report_name_eng": "Rates of Exchange of Commercial Banks in Bangkok Metropolis (2002-present)",
+        "report_remark": [
+          {
+            "report_remark_eng": "Since Nov 16, 2015 the data regarding Buying Transfer Rate of PKR has been changed to Buying Rate using Foreign Exchange Rates (LSEG) with Bangkok Market Crossing.",
+            "report_remark_th": "ตั้งแต่วันที่ 16 พ.ย. 2558 ข้อมูลในอัตราซื้อเงินโอนของสกุล PKR ..."
+          }
+        ],
+        "last_updated": "2026-11-26",
+        ...
+      },
+      "data_detail": [
+        {
+          "period": "2026-11-26",
+          "currency_id": "USD",
+          "currency_name_th": "สหรัฐอเมริกา : ดอลลาร์ (USD)",
+          "currency_name_eng": "USA : DOLLAR (USD) ",
+          "buying_sight": "33.7914000",
+          "buying_transfer": "33.8733000",
+          "selling": "34.2015000",
+          "mid_rate": "34.0374000"
+        },
+        // ... อีก 4 วัน
+      ]
+    }
+  }
+}`,
+        notes: [
+          ["ok", "key เดียวกันใช้ได้ทั้งสอง API"],
+          [
+            "bad",
+            "<code>api</code> ใน response จริงเป็นชื่อของ ReferenceRate ส่วน ReferenceRate ก็มี <code>report_name</code> เป็นของ ExchangeRate ชื่อสลับกันทั้งสองทาง",
+          ],
+          [
+            "warn",
+            '<code>mid_rate</code> ของ USD ต่างจากเรตอ้างอิงวันเดียวกัน −0.033 ถึง +0.023 บาท ใช้แทนกันไม่ได้ (ดู<a class="underline" href="#exg">ตารางเทียบ</a>)',
+          ],
+          [
+            "ok",
+            "จำกัด 31 วันและแถวว่างวันหยุดเหมือนกัน แต่แถวว่างยังมี <code>currency_id</code>",
+          ],
+          [
+            "warn",
+            'หน่วยไม่เท่ากันทุกสกุล: JPY ต่อ 100 เยน, IDR ต่อ 1,000 รูเปียห์ และชื่อ GBP สะกด "STERING"',
+          ],
+          [
+            "info",
+            "หมายเหตุใน <code>report_remark</code> เปลี่ยนจาก THOMSON REUTERS ใน spec เป็น LSEG ในของจริง",
+          ],
+        ],
+      },
+    ];
+
+    const noteDot = {
+      ok: "bg-ok",
+      warn: "bg-warn",
+      bad: "bg-bad",
+      info: "bg-muted",
+    };
+    const BASE =
+      "https://gateway.api.bot.or.th/Stat-ReferenceRate/v2/DAILY_REF_RATE/";
+    const curlFor = (r, auth, base) => {
+      const hdr =
+        r.d && r.d.startsWith("Authorization")
+          ? r.d
+          : r.d === "ไม่ส่ง header"
+            ? null
+            : auth.split("\n")[0];
+      return (
+        `curl -s "${base || BASE}${r.q ? "?" + r.q : ""}"` +
+        (hdr ? ` -H "${hdr}"` : "")
+      );
+    };
+    const paneLabel = (t) =>
+      `<p class="eyebrow border-b border-code-line px-4 py-2 text-code-dim">${t}</p>`;
+
+    const rows = [
+      ["2026-10-26", 33.792],
+      ["2026-10-27", 33.745],
+      ["2026-10-28", 33.815],
+      ["2026-10-29", 33.748],
+      ["2026-10-30", 33.701],
+      ["2026-11-02", 33.785],
+      ["2026-11-03", 33.729],
+      ["2026-11-04", 33.707],
+      ["2026-11-05", 33.431],
+      ["2026-11-06", 33.503],
+      ["2026-11-09", 33.527],
+      ["2026-11-10", 33.392],
+      ["2026-11-11", 33.61],
+      ["2026-11-12", 33.776],
+      ["2026-11-13", 33.859],
+      ["2026-11-16", 33.864],
+      ["2026-11-17", 33.831],
+      ["2026-11-18", 33.887],
+      ["2026-11-19", 33.982],
+      ["2026-11-20", 33.953],
+      ["2026-11-23", 33.993],
+      ["2026-11-24", 33.944],
+      ["2026-11-25", 34.025],
+      ["2026-11-26", 34.014],
+    ];
+    const rateTable = () => {
+      const desc = rows.slice().reverse();
+      return `<details class="group border-t border-line">
+      <summary class="flex cursor-pointer list-none items-center justify-between px-5 py-3 text-sm font-medium hover:bg-sunken">
+        <span>ข้อมูลทั้ง 24 แถวที่ได้</span><span class="font-mono text-xs text-muted group-open:hidden">แสดง ▾</span><span class="hidden font-mono text-xs text-muted group-open:inline">ซ่อน ▴</span>
+      </summary>
+      <div class="overflow-x-auto px-5 pb-5">
+        <table class="tbl font-mono tabular-nums">
+          <thead><tr><th>period</th><th>rate (string จาก API)</th><th class="text-right">เปลี่ยนจากวันก่อน</th></tr></thead>
+          <tbody>${desc
+            .map(([d, v], i) => {
+              const prev = desc[i + 1];
+              const ch = prev ? v - prev[1] : null;
+              const cls =
+                ch == null
+                  ? "text-muted"
+                  : ch > 0
+                    ? "text-ok"
+                    : ch < 0
+                      ? "text-bad"
+                      : "text-muted";
+              return `<tr><td>${d}</td><td>"${v.toFixed(7)}"</td><td class="text-right ${cls}">${ch == null ? "—" : (ch > 0 ? "+" : "") + ch.toFixed(4)}</td></tr>`;
+            })
+            .join("")}</tbody>
+        </table>
+      </div>
+    </details>`;
+    };
+
+    $("expIndex").innerHTML = exps
+      .map(
+        (e) =>
+          `<a href="#exp-${e.n}" class="rounded-md border border-line bg-surface px-2 py-1 font-mono text-muted hover:border-accent hover:text-accent">EXP-${e.n}</a>`,
+      )
+      .join("");
+
+    $("exps").innerHTML = exps
+      .map((e) => {
+        const multi = e.reqs.length > 1;
+        const reqList = e.reqs
+          .map(
+            (r, i) => `
+      <div class="${i ? "border-t border-code-line" : ""} grid gap-1 px-4 py-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          ${r.d ? `<span class="font-sans text-xs text-code-dim">${esc(r.d)}</span>` : "<span></span>"}
+          <span class="flex items-center gap-2">${pill(r.s)}
+            <button type="button" data-copy="${esc(curlFor(r, e.auth, e.base)).replace(/"/g, "&quot;")}" class="rounded border border-code-line px-1.5 py-0.5 font-sans text-[11px] text-code-dim hover:text-code-ink">คัดลอก curl</button>
+          </span>
+        </div>
+        <pre class="text-code-ink">${hl("GET " + (e.path || "/DAILY_REF_RATE/") + (r.q ? "?" + r.q.replace(/&/g, "\n    &") : ""))}</pre>
+        ${multi && r.body ? `<pre class="mt-2 whitespace-pre-wrap break-words rounded-md bg-black/20 px-3 py-2 text-code-ink">${hl(r.body)}</pre>` : ""}
+      </div>`,
+          )
+          .join("");
+        const sharedBody = e.body || (!multi && e.reqs[0].body);
+        return `
+    <article id="exp-${e.n}" class="overflow-hidden rounded-2xl border border-line bg-surface">
+      <header class="grid gap-1 px-5 py-4 sm:flex sm:items-baseline sm:gap-4">
+        <span class="font-mono text-sm font-semibold text-accent">EXP-${e.n}</span>
+        <div class="grid gap-0.5">
+          <h4 class="font-display text-lg font-semibold">${e.title}</h4>
+          <p class="text-sm text-muted"><span class="font-medium text-ink">${e.group}</span> · ${e.goal}</p>
+        </div>
+      </header>
+      <div class="grid bg-code text-code-ink ${sharedBody || e.headers ? "lg:grid-cols-2" : ""}">
+        <div class="min-w-0 border-code-line ${sharedBody || e.headers ? "lg:border-r" : ""}">
+          ${paneLabel("Request" + (multi ? ` · ${e.reqs.length} ครั้ง` : ""))}
+          ${reqList}
+          ${e.auth ? `<pre class="border-t border-code-line px-4 py-3 text-code-ink">${hl(e.auth)}</pre>` : ""}
+          ${e.headers ? `${paneLabel("Response headers (บางส่วน)")}<pre class="px-4 py-3">${hl(e.headers)}</pre>` : ""}
+        </div>
+        ${
+          sharedBody
+            ? `<div class="min-w-0 border-t border-code-line lg:border-t-0">
+          ${paneLabel("Response body" + (e.bodyLabel || (multi ? " · เหมือนกันทุกครั้ง" : "")))}
+          <pre class="whitespace-pre-wrap break-words px-4 py-3">${hl(sharedBody)}</pre>
+        </div>`
+            : ""
+        }
+      </div>
+      <div class="px-5 py-4">
+        <p class="eyebrow mb-2 text-muted">ข้อสังเกต</p>
+        <ul class="grid gap-2 text-[15px]">${e.notes.map(([k, t]) => `<li class="grid grid-cols-[12px_minmax(0,1fr)] items-baseline gap-2"><span class="inline-block h-2 w-2 translate-y-[-1px] rounded-full ${noteDot[k]}"></span><span>${t}</span></li>`).join("")}</ul>
+      </div>
+      ${e.table ? rateTable() : ""}
+    </article>`;
+      })
+      .join("");
+
+    /* copy curl */
+    document.addEventListener("click", (ev) => {
+      const b = ev.target.closest("[data-copy]");
+      if (!b) return;
+      const text = b.getAttribute("data-copy");
+      const done = () => {
+        const t = b.textContent;
+        b.textContent = "คัดลอกแล้ว";
+        setTimeout(() => (b.textContent = t), 1400);
+      };
+      const fallback = () => {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          done();
+        } catch (e) {}
+        ta.remove();
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(text).then(done, fallback);
+      else fallback();
+    });
+
+    /* =========================================================
+     Impact rules
+     ========================================================= */
+    const rules = [
+      ["ยิงเป็นช่วงละไม่เกิน 31 วัน 2 ช่วงต่อกัน แล้วรวมผล", "#exp-3"],
+      [
+        "กรองแถวที่ <code>period</code> หรือ <code>rate</code> เป็นค่าว่างทิ้งก่อนทำอย่างอื่น",
+        "#exp-4",
+      ],
+      [
+        "sort ตาม <code>period</code> เอง ตัดเอา 20 ตัวล่าสุด ถ้าไม่ครบ 20 ให้ log เตือน",
+        "#q4",
+      ],
+      [
+        "บันทึกด้วย upsert โดยมี <code>period</code> เป็น PRIMARY KEY ห้าม append ตรงๆ",
+        "#q5",
+      ],
+      [
+        "ตัดสินผลจาก status code: 401 คือไม่ได้ตั้ง key, 403 คือ key ใช้ไม่ได้, 400 ให้ log <code>moreInformation</code>",
+        "#exp-5",
+      ],
+      ["ห้ามใช้ header <code>X-RateLimit-*</code> ตัดสินโควตา", "#exp-1"],
+      [
+        "ไม่ใช้ <code>data_header</code> ใช้แค่ <code>data_detail</code>",
+        "#exp-1",
+      ],
+      [
+        "header เป็น <code>Authorization: &lt;token&gt;</code> ไม่ใช่ <code>X-IBM-Client-Id</code> และไม่ต้องมี Bearer",
+        "#q13",
+      ],
+    ];
+    $("rules").innerHTML = rules
+      .map(
+        ([t, href], i) => `
+    <li class="grid grid-cols-[32px_minmax(0,1fr)] items-start gap-3 rounded-xl border border-line bg-surface p-4">
+      <span class="grid h-7 w-7 place-items-center rounded-full bg-accent-soft font-mono text-xs font-semibold text-accent">${i + 1}</span>
+      <span class="grid gap-1"><span>${t}</span><a href="${href}" class="w-fit font-mono text-xs text-muted hover:text-accent">หลักฐาน ${href.replace("#", "").toUpperCase()}</a></span>
+    </li>`,
+      )
+      .join("");
+
+    /* =========================================================
+     Ticker chart
+     ========================================================= */
+    const svg = $("spark");
+    const W = 640,
+      H = 170,
+      L = 52,
+      R = 18,
+      T = 14,
+      B = 28,
+      lo = 33.3,
+      hi = 34.1;
+    const x = (i) => L + (i * (W - L - R)) / (rows.length - 1);
+    const y = (v) => T + ((hi - v) * (H - T - B)) / (hi - lo);
+    const ns = "http://www.w3.org/2000/svg";
+    const el = (n, a, txt) => {
+      const e = document.createElementNS(ns, n);
+      for (const k in a) e.setAttribute(k, a[k]);
+      if (txt) e.textContent = txt;
+      svg.appendChild(e);
+      return e;
+    };
+    const mono = "JetBrains Mono, monospace";
+    const defs = el("defs", {});
+    const g = document.createElementNS(ns, "linearGradient");
+    g.setAttribute("id", "fillg");
+    g.setAttribute("x1", 0);
+    g.setAttribute("x2", 0);
+    g.setAttribute("y1", 0);
+    g.setAttribute("y2", 1);
+    [
+      ["0%", ".22"],
+      ["100%", "0"],
+    ].forEach(([o, op]) => {
+      const s = document.createElementNS(ns, "stop");
+      s.setAttribute("offset", o);
+      s.setAttribute("stop-color", "var(--accent)");
+      s.setAttribute("stop-opacity", op);
+      g.appendChild(s);
+    });
+    defs.appendChild(g);
+    [33.4, 33.6, 33.8, 34.0].forEach((v) => {
+      el("line", {
+        x1: L,
+        x2: W - R,
+        y1: y(v),
+        y2: y(v),
+        stroke: "var(--line)",
+        "stroke-width": 1,
+        "stroke-dasharray": "2 4",
+      });
+      el(
+        "text",
+        {
+          x: L - 10,
+          y: y(v) + 4,
+          "text-anchor": "end",
+          "font-size": 11,
+          fill: "var(--muted)",
+          "font-family": mono,
+        },
+        v.toFixed(2),
+      );
+    });
+    [0, 6, 12, 18, 23].forEach((i) =>
+      el(
+        "text",
+        {
+          x: x(i),
+          y: H - 8,
+          "text-anchor": i === 0 ? "start" : i === 23 ? "end" : "middle",
+          "font-size": 11,
+          fill: "var(--muted)",
+          "font-family": mono,
+        },
+        rows[i][0].slice(8) + "/" + rows[i][0].slice(5, 7),
+      ),
+    );
+    const pts = rows.map((r, i) => `${x(i).toFixed(1)},${y(r[1]).toFixed(1)}`);
+    el("path", {
+      d: `M${pts[0]} L${pts.join(" L")} L${x(23)},${H - B} L${x(0)},${H - B} Z`,
+      fill: "url(#fillg)",
+    });
+    el("polyline", {
+      points: pts.join(" "),
+      fill: "none",
+      stroke: "var(--accent)",
+      "stroke-width": 2.25,
+      "stroke-linejoin": "round",
+      "stroke-linecap": "round",
+    });
+    const mi = rows.reduce((m, r, i) => (r[1] < rows[m][1] ? i : m), 0);
+    el("circle", {
+      cx: x(mi),
+      cy: y(rows[mi][1]),
+      r: 3.5,
+      fill: "var(--surface)",
+      stroke: "var(--muted)",
+      "stroke-width": 1.5,
+    });
+    el(
+      "text",
+      {
+        x: x(mi),
+        y: y(rows[mi][1]) + 18,
+        "text-anchor": "middle",
+        "font-size": 11,
+        fill: "var(--muted)",
+        "font-family": mono,
+      },
+      rows[mi][1].toFixed(3),
+    );
+    el("circle", {
+      cx: x(23),
+      cy: y(rows[23][1]),
+      r: 7,
+      fill: "var(--accent)",
+      opacity: 0.18,
+    });
+    el("circle", {
+      cx: x(23),
+      cy: y(rows[23][1]),
+      r: 4,
+      fill: "var(--accent)",
+      stroke: "var(--surface)",
+      "stroke-width": 2,
+    });
+
+    /* =========================================================
+     Active part in the switcher
+     ========================================================= */
+    const links = [...document.querySelectorAll(".navlink")];
+    const targets = links.map((a) => document.querySelector(a.getAttribute("href")));
+    const setActive = () => {
+      const yPos = window.scrollY + 120;
+      let idx = -1;
+      targets.forEach((t, i) => {
+        if (t && t.offsetTop <= yPos) idx = i;
+      });
+      links.forEach((a, i) => a.setAttribute("aria-current", i === idx ? "true" : "false"));
+    };
+    window.addEventListener("scroll", setActive, { passive: true });
+    setActive();
+  })();
+</script>

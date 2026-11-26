@@ -402,6 +402,53 @@
   </div>
 </header>
 
+<!-- ===================== confirmed facts ===================== -->
+<section id="facts" class="gutter border-t border-line">
+  <div class="mx-auto max-w-6xl py-14">
+    <div
+      class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:items-end"
+    >
+      <div>
+        <p class="eyebrow text-accent">สรุปก่อนอ่าน</p>
+        <h2 class="mt-2 font-display text-3xl font-bold sm:text-4xl">
+          ข้อเท็จจริงที่ยืนยันแล้ว
+        </h2>
+      </div>
+      <p class="text-muted">
+        ผลรวมจากทั้งสามส่วน ป้าย
+        <span class="rounded-full bg-ok-soft px-2 py-0.5 text-xs font-semibold text-ok">ยิงจริง</span>
+        คือยืนยันด้วยการเรียก API จริงเมื่อ 26 พ.ย. 2026 เทียบกับ spec แล้ว:
+        ตรงกับ spec <b class="text-ok">5</b> เรื่อง, spec ไม่บอก
+        <b class="text-warn">4</b> เรื่อง, spec ผิด <b class="text-bad">2</b> เรื่อง
+      </p>
+    </div>
+    <div class="mt-8 overflow-x-auto rounded-xl border border-line bg-surface">
+      <table class="tbl">
+        <thead>
+          <tr><th>เรื่อง</th><th>ค่าที่ถูกต้อง</th><th>ยืนยันจาก</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="whitespace-nowrap font-medium">API ที่ต้องใช้</td><td>Weighted-average Interbank Exchange Rate – THB/USD</td><td><span class="rounded-full border border-line px-2 text-xs text-muted">โจทย์ข้อ 1</span></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">Base URL</td><td><code>https://gateway.api.bot.or.th/Stat-ReferenceRate/v2</code></td><td><span class="rounded-full border border-line px-2 text-xs text-muted">spec v2.0.1</span></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">Endpoint</td><td><code>GET /DAILY_REF_RATE/</code></td><td><span class="rounded-full border border-line px-2 text-xs text-muted">โจทย์ + spec</span></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">Query params</td><td><code>start_period</code>, <code>end_period</code> รูปแบบ <code>YYYY-MM-DD</code> บังคับทั้งคู่</td><td><span class="rounded-full border border-line px-2 text-xs text-muted">spec</span></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">Auth header</td><td><code>Authorization: &lt;token&gt;</code> ไม่มี <code>Bearer</code></td><td><span class="rounded-full border border-line px-2 text-xs text-muted">spec + หน้า Migration ของ portal</span></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">โครงสร้าง response</td><td><code>result.data.data_detail[]</code> เป็น <b>array</b> ของ <code>{"period": "YYYY-MM-DD", "rate": "43.9200000"}</code></td><td><span class="rounded-full bg-ok-soft px-2 text-xs font-semibold text-ok">ยิงจริง</span> <a class="text-xs text-accent hover:underline" href="#exp-1">EXP-1</a></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">ชนิดของ <code>rate</code></td><td><b>string</b> ทศนิยม 7 ตำแหน่ง</td><td><span class="rounded-full bg-ok-soft px-2 text-xs font-semibold text-ok">ยิงจริง</span> <a class="text-xs text-accent hover:underline" href="#exp-1">EXP-1</a></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">ลำดับใน <code>data_detail</code></td><td>ใหม่ → เก่า (แต่ยังต้อง sort เอง)</td><td><span class="rounded-full bg-ok-soft px-2 text-xs font-semibold text-ok">ยิงจริง</span> <a class="text-xs text-accent hover:underline" href="#exp-1">EXP-1</a></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">ช่วงวันที่ต่อครั้ง</td><td><b><code>end − start</code> ไม่เกิน 31 วัน</b> เกินได้ 400</td><td><span class="rounded-full bg-ok-soft px-2 text-xs font-semibold text-ok">ยิงจริง</span> <a class="text-xs text-accent hover:underline" href="#exp-3">EXP-3</a></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">ช่วงที่ไม่มีวันทำการ</td><td>ได้ 200 + <code>[{"period":"","rate":""}]</code> ไม่ใช่ array ว่าง</td><td><span class="rounded-full bg-ok-soft px-2 text-xs font-semibold text-ok">ยิงจริง</span> <a class="text-xs text-accent hover:underline" href="#exp-4">EXP-4</a></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">เวลาประกาศ</td><td>ทุกวันทำการ 18:00 น. (เวลาไทย) ยิง 21:20 น. ได้ข้อมูลวันนั้นแล้ว</td><td><span class="rounded-full border border-line px-2 text-xs text-muted">spec</span> <span class="rounded-full bg-ok-soft px-2 text-xs font-semibold text-ok">ยิงจริง</span></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">Rate limit</td><td>ไม่จำกัดโควตารวม, 200 ครั้ง/ชั่วโมง การรันหนึ่งรอบใช้แค่ 2 ครั้ง ยังห่างจากขีดจำกัดมาก</td><td><span class="rounded-full border border-line px-2 text-xs text-muted">หน้า product ใน portal</span></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">Header <code>X-RateLimit-*</code></td><td>ใช้ตัดสินโควตาไม่ได้: ยิงผ่านแต่ได้ <code>Limit: -1</code>, <code>Remaining: 0</code></td><td><span class="rounded-full bg-ok-soft px-2 text-xs font-semibold text-ok">ยิงจริง</span> <a class="text-xs text-accent hover:underline" href="#exp-1">EXP-1</a></td></tr>
+          <tr><td class="whitespace-nowrap font-medium"><code>result.timestamp</code></td><td>ไม่มี timezone แต่เป็นเวลาไทย (<code>2026-11-26 21:20:23</code> ตอนที่ header <code>Date</code> เป็น 14:20 GMT)</td><td><span class="rounded-full bg-ok-soft px-2 text-xs font-semibold text-ok">ยิงจริง</span> <a class="text-xs text-accent hover:underline" href="#exp-1">EXP-1</a></td></tr>
+          <tr><td class="whitespace-nowrap font-medium">Error response</td><td>spec เขียนไว้แค่ <code>200 OK</code> ของจริงมี 400, 401, 403, 404 และใช้ body คนละรูปแบบ</td><td><span class="rounded-full border border-line px-2 text-xs text-muted">spec</span> <a class="text-xs text-accent hover:underline" href="#exp-5">EXP-5</a> <a class="text-xs text-accent hover:underline" href="#exp-6">EXP-6</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 <!-- ===================== PART 1 ===================== -->
 <section id="part1" class="gutter border-t border-line">
   <div class="mx-auto max-w-6xl py-14">
@@ -1462,6 +1509,9 @@
         a: `
       <p>ควร ถ้าเขียนกฎจากข้อมูลที่ยังไม่ยืนยัน agent จะเขียนโค้ดตามของที่ผิด <b>ส่วนที่ 3 ทั้งหมดมาจากคำถามข้อนี้</b> และเจอ 4 เรื่องที่ spec ไม่ได้บอก</p>
       <p>หลังยิงแล้ว: เก็บ response ไว้เป็น <code>tests/fixtures/sample_response.json</code> เช็กโครงสร้าง ชนิดของ <code>rate</code> ลำดับวันที่ จำนวนแถว และหน้าตา error</p>
+      ${pre(`curl -s <span class="ts">"https://gateway.api.bot.or.th/Stat-ReferenceRate/v2/DAILY_REF_RATE/?start_period=2026-10-26&amp;end_period=2026-11-26"</span> \\
+  -H <span class="ts">"Authorization: $BOT_API_KEY"</span> -H <span class="ts">"accept: application/json"</span> \\
+  | python3 -m json.tool &gt; sample_response.json`)}
       <p class="text-sm"><a class="font-medium text-accent hover:underline" href="#part2">ไปที่ส่วนที่ 3 ทดลองยิง API →</a></p>`,
       },
 

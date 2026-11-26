@@ -4,6 +4,10 @@
 # uv virtualenv (also holds the SQLite output per the brief)
 .venv/
 
+# SQLite output, wherever BOT_DB_PATH points
+*.db
+*.db-journal
+
 # Python
 __pycache__/
 *.pyc

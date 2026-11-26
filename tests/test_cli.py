@@ -42,6 +42,21 @@ def test_second_run_keeps_twenty_rows(tmp_path, month_response, empty_response):
         assert conn.execute("SELECT COUNT(*) FROM rates").fetchone()[0] == 20
 
 
+def test_warns_when_the_api_revises_a_stored_rate(tmp_path, month_response, empty_response, caplog):
+    settings = Settings(api_key="secret-token", db_path=tmp_path / "rates.db")
+    run(settings, fake_api(month_response, empty_response), NOW)
+
+    for row in month_response["result"]["data"]["data_detail"]:
+        if row["period"] == "2026-11-20":
+            row["rate"] = "33.9999000"
+    with caplog.at_level(logging.WARNING, logger="bot_fx"):
+        run(settings, fake_api(month_response, empty_response), NOW)
+
+    assert "Rate for 2026-11-20 changed: 33.953 -> 33.9999" in caplog.text
+    with sqlite3.connect(settings.db_path) as conn:
+        assert conn.execute("SELECT rate FROM rates WHERE period = '2026-11-20'").fetchone() == (33.9999,)
+
+
 def test_warns_when_fewer_than_twenty_days(tmp_path, empty_response, month_response, caplog):
     month_response["result"]["data"]["data_detail"] = month_response["result"]["data"]["data_detail"][:5]
     settings = Settings(api_key="secret-token", db_path=tmp_path / "rates.db")

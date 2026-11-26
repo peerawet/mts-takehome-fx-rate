@@ -25,10 +25,15 @@ def run(settings: Settings, client: httpx.Client, now: datetime) -> int:
     if not rates:
         return 0
 
-    total = save(settings.db_path, rates, now.isoformat(timespec="seconds"))
+    result = save(settings.db_path, rates, now.isoformat(timespec="seconds"))
+    for c in result.changes:
+        log.warning(
+            "Rate for %s changed: %s -> %s (was fetched %s)",
+            c.period, c.old_rate, c.new_rate, c.old_fetched_at,
+        )
     log.info(
         "Saved %d rows (%s .. %s) to %s; table now holds %d rows",
-        len(rates), rates[0].period, rates[-1].period, settings.db_path, total,
+        len(rates), rates[0].period, rates[-1].period, settings.db_path, result.total_rows,
     )
     return len(rates)
 

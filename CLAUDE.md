@@ -51,7 +51,10 @@ Authorization: <BOT_API_KEY>
 3. ยิง **2 ช่วงต่อกัน** แต่ละช่วงไม่เกิน 31 วัน (รวมราว 60 วัน) เผื่อช่วงที่มีวันหยุดยาว
 4. รวมผล → กรองแถวว่าง → ตัดแถวซ้ำ → sort ตาม `period` → เอา **20 แถวล่าสุด**
 5. ถ้าได้ไม่ถึง 20 แถว ให้ log warning แล้วบันทึกเท่าที่ได้ ห้ามปล่อยผ่านเงียบๆ
-6. upsert ลง SQLite แล้ว log สรุป (จำนวนแถว ช่วงวันที่ path ของไฟล์)
+6. ก่อน upsert เทียบกับค่าที่เก็บไว้ (ที่ความละเอียด 7 ตำแหน่ง) ถ้าวันไหนค่าเปลี่ยน ให้ log warning `Rate for <period> changed: <old> -> <new> (was fetched <old fetched_at>)` แล้วเขียนค่าใหม่ทับตามปกติ
+7. upsert ลง SQLite แล้ว log สรุป (จำนวนแถวที่บันทึก ช่วงวันที่ path ของไฟล์ จำนวนแถวทั้งหมดในตาราง)
+
+ตารางไม่ลบแถวที่เก่ากว่า 20 วันทำการ จึงโตขึ้นวันละแถวเมื่อมีวันทำการใหม่ ถือเป็นพฤติกรรมที่ตั้งใจ
 
 ยิง API แค่ 2 ครั้งต่อการรันหนึ่งรอบ timeout 30 วินาที ไม่ต้อง retry
 
@@ -64,7 +67,7 @@ Authorization: <BOT_API_KEY>
 CREATE TABLE IF NOT EXISTS rates (
     period      TEXT PRIMARY KEY,   -- 'YYYY-MM-DD'
     rate        REAL NOT NULL,      -- บาทต่อ 1 USD
-    fetched_at  TEXT NOT NULL       -- ISO 8601 เวลาไทย เช่น 2026-11-26T21:20:23+07:00
+    fetched_at  TEXT NOT NULL       -- เวลาที่ดึงล่าสุด ISO 8601 เวลาไทย เช่น 2026-11-26T21:20:23+07:00
 );
 
 INSERT INTO rates (period, rate, fetched_at) VALUES (?, ?, ?)
@@ -93,7 +96,8 @@ observations.html      # หน้าสรุปข้อสังเกต (�
 - response ที่มีแถวว่าง `{"period": "", "rate": ""}`: ถูกกรองทิ้ง ไม่ error
 - รวมสองช่วงที่มีวันซ้ำกัน: ไม่มีแถวซ้ำ
 - ได้ไม่ถึง 20 แถว: มี warning
-- upsert สองรอบด้วยข้อมูลเดียวกัน: จำนวนแถวเท่าเดิม
+- upsert สองรอบด้วยข้อมูลเดียวกัน: จำนวนแถวเท่าเดิม และไม่มี warning
+- API ส่งค่าใหม่ให้วันที่มีอยู่แล้ว: ค่าในตารางถูกอัปเดต และมี warning ที่บอกค่าเดิมกับค่าใหม่
 - status 400/401/403: ได้ error ที่อ่านเข้าใจ
 
 ใช้ fixture จาก response จริง (ดูตัวอย่างใน `docs/observations.md` และ `observations.html` ส่วนที่ 3) ห้ามยิง API จริงใน test
